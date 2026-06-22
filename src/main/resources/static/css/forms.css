@@ -1,0 +1,140 @@
+.form-panel,
+.detail-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+}
+
+.form-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-group {
+    display: grid;
+    gap: 7px;
+}
+
+.form-group label,
+.checkbox-field {
+    color: var(--color-text);
+    font-weight: 800;
+}
+
+.form-group input,
+.form-group select {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    min-height: 40px;
+    padding: 0 12px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--color-primary);
+    outline: 2px solid rgba(0, 82, 204, 0.18);
+}
+
+.checkbox-field {
+    align-items: center;
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    display: flex;
+    gap: 10px;
+    min-height: 40px;
+    padding: 0 12px;
+}
+
+.checkbox-field input {
+    height: 16px;
+    width: 16px;
+}
+
+.field-error {
+    color: var(--color-danger);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 22px;
+}
+
+.detail-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+}
+
+.detail-grid div {
+    background: var(--color-surface-soft);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+}
+
+.detail-grid dt {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.detail-grid dd {
+    font-weight: 700;
+    margin: 6px 0 0;
+}
+
+.worker-summary {
+    align-items: center;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 18px;
+}
+
+.worker-avatar {
+    align-items: center;
+    background: #dae2ff;
+    border-radius: var(--radius);
+    color: var(--color-primary-dark);
+    display: inline-flex;
+    flex: 0 0 auto;
+    font-weight: 900;
+    height: 48px;
+    justify-content: center;
+    width: 48px;
+}
+
+.worker-summary h3 {
+    font-size: 18px;
+    margin: 0 0 4px;
+}
+
+.worker-summary p {
+    color: var(--color-muted);
+    margin: 0;
+}
+
+@media (max-width: 720px) {
+    .form-grid,
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .form-actions .button {
+        width: 100%;
+    }
+}

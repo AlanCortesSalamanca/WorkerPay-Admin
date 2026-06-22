@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adelantos | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle='Adelantos'" th:replace="~{layout/navbar :: navbar}"></div>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/advances.js}"></script>
+</body>
+</html>

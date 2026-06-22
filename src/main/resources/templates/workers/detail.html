@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de trabajador | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle=${worker.fullName}" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro">
+            <div>
+                <p class="section-kicker">Detalle del trabajador</p>
+                <h2 th:text="${worker.fullName}">Nombre</h2>
+            </div>
+            <a class="button button-primary" th:href="@{/workers/{id}/edit(id=${worker.id})}">Editar</a>
+        </section>
+        <section class="detail-panel">
+            <div class="worker-summary">
+                <span class="worker-avatar" th:text="${#strings.substring(worker.fullName,0,1)}">T</span>
+                <div>
+                    <h3 th:text="${worker.fullName}">Nombre</h3>
+                    <p th:text="${worker.position}">Puesto</p>
+                </div>
+                <span class="status-pill" th:classappend="${worker.active} ? ' status-active' : ' status-muted'" th:text="${worker.active} ? 'Activo' : 'Inactivo'">Activo</span>
+            </div>
+            <dl class="detail-grid">
+                <div><dt>Nombre</dt><dd th:text="${worker.fullName}">Nombre</dd></div>
+                <div><dt>Telefono</dt><dd th:text="${worker.phone} ?: 'Sin telefono'">Telefono</dd></div>
+                <div><dt>Puesto</dt><dd th:text="${worker.position}">Puesto</dd></div>
+                <div><dt>Tipo de pago</dt><dd><span class="status-pill payment-pill" th:classappend="${' payment-' + worker.paymentType}" th:text="${worker.paymentType}">WEEKLY</span></dd></div>
+                <div><dt>Sueldo base</dt><dd th:text="${#numbers.formatCurrency(worker.baseSalary)}">$0.00</dd></div>
+                <div><dt>Fecha de ingreso</dt><dd th:text="${worker.hireDate}">2026-01-01</dd></div>
+                <div><dt>Estado</dt><dd><span class="status-pill" th:classappend="${worker.active} ? ' status-active' : ' status-muted'" th:text="${worker.active} ? 'Activo' : 'Inactivo'">Activo</span></dd></div>
+            </dl>
+            <div class="form-actions">
+                <a class="button button-secondary" th:href="@{/workers}">Volver</a>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

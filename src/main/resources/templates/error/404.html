@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No encontrado | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body class="login-page">
+<main class="login-shell">
+    <section class="login-panel error-panel">
+        <span class="error-code">404</span>
+        <h1>No encontrado</h1>
+        <p th:text="${message} ?: 'El recurso solicitado no existe.'">El recurso solicitado no existe.</p>
+        <a class="button button-primary button-full" th:href="@{/dashboard}">Ir al dashboard</a>
+        <a class="button button-secondary button-full" th:href="@{/dashboard}">Volver</a>
+    </section>
+</main>
+</body>
+</html>

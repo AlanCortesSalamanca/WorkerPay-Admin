@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle='Dashboard'" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro">
+            <div>
+                <p class="section-kicker">Resumen operativo</p>
+                <h2>Panel general</h2>
+            </div>
+            <a class="button button-primary" th:href="@{/workers/new}">Nuevo trabajador</a>
+        </section>
+        <section class="dashboard-grid">
+            <article class="summary-card">
+                <span>Trabajadores activos</span>
+                <strong th:text="${activeWorkers}">0</strong>
+                <small>Personal disponible para pagos.</small>
+            </article>
+            <article class="summary-card">
+                <span>Adelantos pendientes</span>
+                <strong th:text="${pendingAdvances}">0</strong>
+                <small>Preparado para fases siguientes.</small>
+            </article>
+            <article class="summary-card">
+                <span>Deudas activas</span>
+                <strong th:text="${activeDebts}">0</strong>
+                <small>Saldos por recuperar.</small>
+            </article>
+            <article class="summary-card">
+                <span>Pagos pendientes</span>
+                <strong th:text="${pendingPayments}">0</strong>
+                <small>Nomina por procesar.</small>
+            </article>
+            <article class="summary-card">
+                <span>Total pagado del periodo</span>
+                <strong th:text="${#numbers.formatCurrency(periodPaidTotal)}">$0.00</strong>
+                <small>Acumulado del periodo actual.</small>
+            </article>
+        </section>
+        <section class="quick-actions-panel">
+            <div class="section-heading">
+                <p class="section-kicker">Accesos rapidos</p>
+                <h2>Modulos del sistema</h2>
+            </div>
+            <div class="quick-actions-grid">
+                <a class="quick-action" th:href="@{/workers}"><strong>Trabajadores</strong><span>Gestionar altas, edicion y estado.</span></a>
+                <span class="quick-action quick-action-disabled"><strong>Adelantos</strong><span>Modulo preparado para fase futura.</span></span>
+                <span class="quick-action quick-action-disabled"><strong>Deudas</strong><span>Modulo preparado para fase futura.</span></span>
+                <span class="quick-action quick-action-disabled"><strong>Pagos</strong><span>Modulo preparado para fase futura.</span></span>
+                <a class="quick-action" th:href="@{/reports}"><strong>Reportes</strong><span>Consultar reportes administrativos.</span></a>
+            </div>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

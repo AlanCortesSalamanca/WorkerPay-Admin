@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle='Reportes'" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro">
+            <div>
+                <p class="section-kicker">Analitica administrativa</p>
+                <h2>Reportes disponibles proximamente</h2>
+            </div>
+        </section>
+        <section class="report-grid">
+            <article class="report-card"><span class="report-icon">P</span><span class="status-pill status-muted">Fase futura</span><h3>Pagos por periodo</h3><p>Resumen de pagos por rango semanal, quincenal o mensual.</p><span class="button button-secondary">Proximamente</span></article>
+            <article class="report-card"><span class="report-icon">A</span><span class="status-pill status-muted">Proximamente</span><h3>Adelantos pendientes</h3><p>Listado de adelantos pendientes de descontar.</p><span class="button button-secondary">Proximamente</span></article>
+            <article class="report-card"><span class="report-icon">D</span><span class="status-pill status-muted">Fase futura</span><h3>Deudas activas</h3><p>Control de saldos, abonos y deuda vigente.</p><span class="button button-secondary">Proximamente</span></article>
+            <article class="report-card"><span class="report-icon">H</span><span class="status-pill status-muted">Proximamente</span><h3>Historial por trabajador</h3><p>Consulta consolidada de pagos, adelantos y deudas.</p><span class="button button-secondary">Proximamente</span></article>
+            <article class="report-card"><span class="report-icon">T</span><span class="status-pill status-muted">Fase futura</span><h3>Total pagado semanal/quincenal</h3><p>Acumulados para seguimiento operativo y administrativo.</p><span class="button button-secondary">Proximamente</span></article>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/reports.js}"></script>
+</body>
+</html>

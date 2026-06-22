@@ -1,0 +1,11 @@
+<header class="navbar" th:fragment="navbar">
+    <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-label="Abrir menu">Menu</button>
+    <div class="navbar-title">
+        <p class="navbar-kicker">Sistema interno</p>
+        <h1 th:text="${pageTitle} ?: 'WorkerPay Admin'">WorkerPay Admin</h1>
+    </div>
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button type="submit" class="button button-secondary">Cerrar sesion</button>
+    </form>
+</header>

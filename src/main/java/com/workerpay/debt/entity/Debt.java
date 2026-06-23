@@ -42,4 +42,56 @@ public class Debt extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private DebtStatus status = DebtStatus.ACTIVE;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Worker getWorker() {
+        return worker;
+    }
+
+    public void setWorker(Worker worker) {
+        this.worker = worker;
+    }
+
+    public BigDecimal getOriginalAmount() {
+        return originalAmount;
+    }
+
+    public void setOriginalAmount(BigDecimal originalAmount) {
+        this.originalAmount = originalAmount;
+    }
+
+    public BigDecimal getCurrentBalance() {
+        return currentBalance;
+    }
+
+    public void setCurrentBalance(BigDecimal currentBalance) {
+        this.currentBalance = currentBalance;
+    }
+
+    public BigDecimal getSuggestedPayment() {
+        return suggestedPayment;
+    }
+
+    public void setSuggestedPayment(BigDecimal suggestedPayment) {
+        this.suggestedPayment = suggestedPayment;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public DebtStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DebtStatus status) {
+        this.status = status;
+    }
 }

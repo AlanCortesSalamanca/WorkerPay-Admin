@@ -95,6 +95,34 @@ tbody tr:last-child td {
     color: var(--color-danger);
 }
 
+.debt-ACTIVE,
+.period-OPEN,
+.payroll-PENDING {
+    background: #fff7ed;
+    color: var(--color-warning);
+}
+
+.debt-PAID,
+.payroll-PAID {
+    background: #dcfce7;
+    color: var(--color-success);
+}
+
+.debt-CANCELLED,
+.payroll-CANCELLED {
+    background: #ffdad6;
+    color: var(--color-danger);
+}
+
+.period-CLOSED {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.table-panel-spaced {
+    margin-top: 20px;
+}
+
 @media (max-width: 720px) {
     .table-panel {
         border-radius: var(--radius);

@@ -55,4 +55,88 @@ public class PayrollPayment extends BaseEntity {
     private PayrollPaymentStatus status = PayrollPaymentStatus.PENDING;
 
     private LocalDate paymentDate;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Worker getWorker() {
+        return worker;
+    }
+
+    public void setWorker(Worker worker) {
+        this.worker = worker;
+    }
+
+    public PaymentPeriod getPeriod() {
+        return period;
+    }
+
+    public void setPeriod(PaymentPeriod period) {
+        this.period = period;
+    }
+
+    public BigDecimal getBaseAmount() {
+        return baseAmount;
+    }
+
+    public void setBaseAmount(BigDecimal baseAmount) {
+        this.baseAmount = baseAmount;
+    }
+
+    public BigDecimal getBonuses() {
+        return bonuses;
+    }
+
+    public void setBonuses(BigDecimal bonuses) {
+        this.bonuses = bonuses;
+    }
+
+    public BigDecimal getAdvanceDiscount() {
+        return advanceDiscount;
+    }
+
+    public void setAdvanceDiscount(BigDecimal advanceDiscount) {
+        this.advanceDiscount = advanceDiscount;
+    }
+
+    public BigDecimal getDebtDiscount() {
+        return debtDiscount;
+    }
+
+    public void setDebtDiscount(BigDecimal debtDiscount) {
+        this.debtDiscount = debtDiscount;
+    }
+
+    public BigDecimal getOtherDiscounts() {
+        return otherDiscounts;
+    }
+
+    public void setOtherDiscounts(BigDecimal otherDiscounts) {
+        this.otherDiscounts = otherDiscounts;
+    }
+
+    public BigDecimal getNetPayment() {
+        return netPayment;
+    }
+
+    public void setNetPayment(BigDecimal netPayment) {
+        this.netPayment = netPayment;
+    }
+
+    public PayrollPaymentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PayrollPaymentStatus status) {
+        this.status = status;
+    }
+
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 }

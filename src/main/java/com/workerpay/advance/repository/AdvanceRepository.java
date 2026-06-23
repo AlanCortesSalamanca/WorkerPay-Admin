@@ -11,5 +11,7 @@ public interface AdvanceRepository extends JpaRepository<Advance, Long> {
 
     List<Advance> findByWorkerId(Long workerId);
 
+    List<Advance> findByWorkerIdAndStatus(Long workerId, AdvanceStatus status);
+
     long countByStatus(AdvanceStatus status);
 }

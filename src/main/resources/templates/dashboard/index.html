@@ -29,7 +29,7 @@
             <article class="summary-card">
                 <span>Adelantos pendientes</span>
                 <strong th:text="${pendingAdvances}">0</strong>
-                <small>Preparado para fases siguientes.</small>
+                <small>Montos por descontar en pagos.</small>
             </article>
             <article class="summary-card">
                 <span>Deudas activas</span>
@@ -55,8 +55,9 @@
             <div class="quick-actions-grid">
                 <a class="quick-action" th:href="@{/workers}"><strong>Trabajadores</strong><span>Gestionar altas, edicion y estado.</span></a>
                 <a class="quick-action" th:href="@{/advances}"><strong>Adelantos</strong><span>Registrar y consultar adelantos pendientes.</span></a>
-                <span class="quick-action quick-action-disabled"><strong>Deudas</strong><span>Modulo preparado para fase futura.</span></span>
-                <span class="quick-action quick-action-disabled"><strong>Pagos</strong><span>Modulo preparado para fase futura.</span></span>
+                <a class="quick-action" th:href="@{/debts}"><strong>Deudas</strong><span>Controlar saldos y abonos de trabajadores.</span></a>
+                <a class="quick-action" th:href="@{/payment-periods}"><strong>Periodos</strong><span>Abrir y cerrar periodos de pago.</span></a>
+                <a class="quick-action" th:href="@{/payroll}"><strong>Pagos</strong><span>Calcular y marcar pagos de nomina.</span></a>
                 <a class="quick-action" th:href="@{/reports}"><strong>Reportes</strong><span>Consultar reportes administrativos.</span></a>
             </div>
         </section>

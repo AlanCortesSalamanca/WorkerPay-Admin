@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pago | WorkerPay Admin</title>
+    <title th:text="${formTitle} + ' | WorkerPay Admin'">Pago | WorkerPay Admin</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/forms.css}">
@@ -12,7 +12,66 @@
 <div class="app-shell">
     <div th:replace="~{layout/sidebar :: sidebar}"></div>
     <main class="content-shell">
-        <div th:with="pageTitle='Pago'" th:replace="~{layout/navbar :: navbar}"></div>
+        <div th:with="pageTitle=${formTitle}" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro"><div><p class="section-kicker">Pagos</p><h2 th:text="${formTitle}">Formulario</h2></div></section>
+        <div class="alert alert-danger" th:if="${#lists.isEmpty(workers)}">Primero debes crear o activar un trabajador.</div>
+        <div class="alert alert-danger" th:if="${#lists.isEmpty(periods)}">Primero debes crear un periodo abierto.</div>
+        <form th:action="@{${formAction}}" th:object="${payrollPaymentForm}" method="post" class="form-panel">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="alert alert-danger" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="workerId">Trabajador</label>
+                    <select id="workerId" th:field="*{workerId}">
+                        <option value="">Selecciona un trabajador</option>
+                        <option th:each="worker : ${workers}" th:value="${worker.id}" th:text="${worker.fullName + ' - $' + #numbers.formatDecimal(worker.baseSalary, 1, 'COMMA', 2, 'POINT')}">Trabajador</option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('workerId')}" th:errors="*{workerId}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="periodId">Periodo</label>
+                    <select id="periodId" th:field="*{periodId}">
+                        <option value="">Selecciona un periodo</option>
+                        <option th:each="period : ${periods}" th:value="${period.id}" th:text="${period.name + ' (' + period.startDate + ' - ' + period.endDate + ')'}">Periodo</option>
+                    </select>
+                    <span class="field-error" th:if="${#fields.hasErrors('periodId')}" th:errors="*{periodId}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="baseAmount">Sueldo base</label>
+                    <input id="baseAmount" type="number" step="0.01" min="0" th:field="*{baseAmount}">
+                    <span class="field-error" th:if="${#fields.hasErrors('baseAmount')}" th:errors="*{baseAmount}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="bonuses">Bonos</label>
+                    <input id="bonuses" type="number" step="0.01" min="0" th:field="*{bonuses}">
+                    <span class="field-error" th:if="${#fields.hasErrors('bonuses')}" th:errors="*{bonuses}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="advanceDiscount">Descuento por adelantos</label>
+                    <input id="advanceDiscount" type="number" step="0.01" min="0" th:field="*{advanceDiscount}">
+                    <span class="field-error" th:if="${#fields.hasErrors('advanceDiscount')}" th:errors="*{advanceDiscount}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="debtDiscount">Descuento por deuda</label>
+                    <input id="debtDiscount" type="number" step="0.01" min="0" th:field="*{debtDiscount}">
+                    <span class="field-error" th:if="${#fields.hasErrors('debtDiscount')}" th:errors="*{debtDiscount}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="otherDiscounts">Otros descuentos</label>
+                    <input id="otherDiscounts" type="number" step="0.01" min="0" th:field="*{otherDiscounts}">
+                    <span class="field-error" th:if="${#fields.hasErrors('otherDiscounts')}" th:errors="*{otherDiscounts}"></span>
+                </div>
+                <div class="form-group">
+                    <label for="paymentDate">Fecha de pago</label>
+                    <input id="paymentDate" type="date" th:field="*{paymentDate}">
+                    <span class="field-error" th:if="${#fields.hasErrors('paymentDate')}" th:errors="*{paymentDate}"></span>
+                </div>
+            </div>
+            <div class="form-actions">
+                <a class="button button-secondary" th:href="@{/payroll}">Cancelar</a>
+                <button type="submit" class="button button-primary" th:disabled="${#lists.isEmpty(workers) or #lists.isEmpty(periods)}">Guardar</button>
+            </div>
+        </form>
     </main>
 </div>
 <script th:src="@{/js/main.js}"></script>

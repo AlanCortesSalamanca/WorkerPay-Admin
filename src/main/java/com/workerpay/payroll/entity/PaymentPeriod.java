@@ -19,6 +19,9 @@ public class PaymentPeriod extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 100)
+    private String name;
+
     @Column(nullable = false)
     private LocalDate startDate;
 
@@ -28,4 +31,40 @@ public class PaymentPeriod extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private PaymentPeriodStatus status = PaymentPeriodStatus.OPEN;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public PaymentPeriodStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PaymentPeriodStatus status) {
+        this.status = status;
+    }
 }

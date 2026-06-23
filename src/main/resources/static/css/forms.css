@@ -85,6 +85,10 @@
     margin: 0;
 }
 
+.form-panel-spaced {
+    margin-top: 20px;
+}
+
 .detail-grid {
     display: grid;
     gap: 18px;

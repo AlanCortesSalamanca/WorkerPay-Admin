@@ -16,16 +16,15 @@
         <section class="page-intro">
             <div>
                 <p class="section-kicker">Analitica administrativa</p>
-                <h2>Reportes disponibles proximamente</h2>
+                <h2>Reportes reales</h2>
             </div>
         </section>
         <section class="report-grid">
-            <article class="report-card"><span class="report-icon">P</span><span class="status-pill status-muted">Proximamente</span><h3>Pagos por periodo</h3><p>Resumen de pagos por rango semanal, quincenal o mensual.</p><span class="button button-secondary">Proximamente</span></article>
-            <article class="report-card"><span class="report-icon">A</span><span class="status-pill status-muted">Proximamente</span><h3>Adelantos pendientes</h3><p>Listado de adelantos pendientes de descontar.</p><span class="button button-secondary">Proximamente</span></article>
-            <article class="report-card"><span class="report-icon">D</span><span class="status-pill status-muted">Proximamente</span><h3>Deudas activas</h3><p>Control de saldos, abonos y deuda vigente.</p><span class="button button-secondary">Proximamente</span></article>
-            <article class="report-card"><span class="report-icon">H</span><span class="status-pill status-muted">Proximamente</span><h3>Historial por trabajador</h3><p>Consulta consolidada de pagos, adelantos y deudas.</p><span class="button button-secondary">Proximamente</span></article>
-            <article class="report-card"><span class="report-icon">X</span><span class="status-pill status-muted">Proximamente</span><h3>Adelantos descontados</h3><p>Seguimiento de adelantos aplicados en pagos.</p><span class="button button-secondary">Proximamente</span></article>
-            <article class="report-card"><span class="report-icon">T</span><span class="status-pill status-muted">Proximamente</span><h3>Total pagado</h3><p>Acumulados para seguimiento operativo y administrativo.</p><span class="button button-secondary">Proximamente</span></article>
+            <article class="report-card"><span class="report-icon">P</span><h3>Pagos por periodo</h3><p>Consulta pagos, descuentos y totales por periodo o estado.</p><a class="button button-secondary" th:href="@{/reports/payroll-by-period}">Ver reporte</a></article>
+            <article class="report-card"><span class="report-icon">A</span><h3>Adelantos pendientes</h3><p>Listado filtrable de adelantos pendientes de descontar.</p><a class="button button-secondary" th:href="@{/reports/advances-pending}">Ver reporte</a></article>
+            <article class="report-card"><span class="report-icon">D</span><h3>Deudas activas</h3><p>Control de saldos vivos, montos originales y abonos sugeridos.</p><a class="button button-secondary" th:href="@{/reports/debts-active}">Ver reporte</a></article>
+            <article class="report-card"><span class="report-icon">H</span><h3>Historial por trabajador</h3><p>Pagos, adelantos, deudas y abonos consolidados.</p><a class="button button-secondary" th:href="@{/reports/worker-history}">Ver reporte</a></article>
+            <article class="report-card"><span class="report-icon">R</span><h3>Resumen financiero</h3><p>Vista ejecutiva con totales y movimientos recientes.</p><a class="button button-secondary" th:href="@{/reports/financial-summary}">Ver reporte</a></article>
         </section>
     </main>
 </div>

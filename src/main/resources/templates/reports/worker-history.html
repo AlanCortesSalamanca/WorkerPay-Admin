@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial por trabajador | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle='Historial por trabajador'" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro"><div><p class="section-kicker">Reportes</p><h2>Historial financiero</h2></div><a class="button button-secondary" th:href="@{/reports}">Volver</a></section>
+        <form class="form-panel report-filter-panel" method="get" th:action="@{/reports/worker-history}" th:object="${filter}">
+            <div class="form-grid">
+                <div class="form-group form-group-wide"><label for="workerId">Trabajador</label><select id="workerId" th:field="*{workerId}"><option value="">Selecciona un trabajador</option><option th:each="worker : ${workers}" th:value="${worker.id}" th:text="${worker.fullName + ' - ' + worker.position}">Trabajador</option></select></div>
+            </div>
+            <div class="form-actions">
+                <a class="button button-secondary" th:href="@{/reports/worker-history}">Limpiar filtros</a>
+                <a class="button button-secondary" th:if="${history != null}" th:href="@{/reports/export/worker-history(workerId=${filter.workerId})}">Exportar CSV</a>
+                <button class="button button-primary" type="submit">Filtrar</button>
+            </div>
+        </form>
+        <div class="alert alert-danger" th:if="${emptyMessage}" th:text="${emptyMessage}"></div>
+        <section class="detail-panel table-panel-spaced" th:if="${history != null}">
+            <div class="worker-summary">
+                <span class="worker-avatar" th:text="${#strings.substring(history.workerName(),0,1)}">T</span>
+                <div><h3 th:text="${history.workerName()}">Trabajador</h3><p th:text="${history.workerPosition()}">Puesto</p></div>
+                <span class="status-pill" th:text="${history.active() ? 'Activo' : 'Inactivo'}">Activo</span>
+            </div>
+            <dl class="detail-grid">
+                <div><dt>Tipo de pago</dt><dd th:text="${history.paymentType()}">WEEKLY</dd></div>
+                <div><dt>Sueldo base</dt><dd th:text="${'$' + #numbers.formatDecimal(history.baseSalary(), 1, 'COMMA', 2, 'POINT')}">$0.00</dd></div>
+            </dl>
+        </section>
+        <section class="dashboard-grid report-totals" th:if="${history != null}">
+            <article class="summary-card"><span>Total pagado</span><strong th:text="${'$' + #numbers.formatDecimal(history.totalPaid(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+            <article class="summary-card"><span>Adelantos pendientes</span><strong th:text="${'$' + #numbers.formatDecimal(history.totalPendingAdvances(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+            <article class="summary-card"><span>Adelantos descontados</span><strong th:text="${'$' + #numbers.formatDecimal(history.totalDiscountedAdvances(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+            <article class="summary-card"><span>Deudas activas</span><strong th:text="${history.activeDebtsCount()}">0</strong></article>
+            <article class="summary-card"><span>Saldo pendiente</span><strong th:text="${'$' + #numbers.formatDecimal(history.totalPendingDebtBalance(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+            <article class="summary-card"><span>Total abonado</span><strong th:text="${'$' + #numbers.formatDecimal(history.totalDebtPayments(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+        </section>
+        <section class="table-panel table-panel-spaced" th:if="${history != null}">
+            <table><thead><tr><th colspan="10">Pagos</th></tr><tr><th>Periodo</th><th>Sueldo</th><th>Bonos</th><th>Adelantos</th><th>Deuda</th><th>Otros</th><th>Neto</th><th>Estado</th><th>Fecha</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(history.payments())}"><td colspan="9" class="empty-cell">Sin pagos.</td></tr><tr th:each="row : ${history.payments()}"><td th:text="${row.periodName()}">Periodo</td><td th:text="${'$' + #numbers.formatDecimal(row.baseAmount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.bonuses(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.advanceDiscount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.debtDiscount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.otherDiscounts(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.netPayment(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.status()}">Estado</td><td th:text="${row.paymentDate()}">Fecha</td></tr></tbody></table>
+        </section>
+        <section class="table-panel table-panel-spaced" th:if="${history != null}">
+            <table><thead><tr><th colspan="7">Adelantos</th></tr><tr><th>Monto</th><th>Fecha</th><th>Motivo</th><th>Estado</th><th>Creacion</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(history.advances())}"><td colspan="5" class="empty-cell">Sin adelantos.</td></tr><tr th:each="row : ${history.advances()}"><td th:text="${'$' + #numbers.formatDecimal(row.amount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.date()}">Fecha</td><td th:text="${row.reason()} ?: 'Sin motivo'">Motivo</td><td th:text="${row.status()}">Estado</td><td th:text="${#temporals.format(row.createdAt(), 'yyyy-MM-dd HH:mm')}">Creacion</td></tr></tbody></table>
+        </section>
+        <section class="table-panel table-panel-spaced" th:if="${history != null}">
+            <table><thead><tr><th colspan="8">Deudas</th></tr><tr><th>Monto original</th><th>Saldo actual</th><th>Abono sugerido</th><th>Descripcion</th><th>Estado</th><th>Creacion</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(history.debts())}"><td colspan="6" class="empty-cell">Sin deudas.</td></tr><tr th:each="row : ${history.debts()}"><td th:text="${'$' + #numbers.formatDecimal(row.originalAmount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.currentBalance(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.suggestedPayment(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.description()} ?: 'Sin descripcion'">Descripcion</td><td th:text="${row.status()}">Estado</td><td th:text="${#temporals.format(row.createdAt(), 'yyyy-MM-dd HH:mm')}">Creacion</td></tr></tbody></table>
+        </section>
+        <section class="table-panel table-panel-spaced" th:if="${history != null}">
+            <table><thead><tr><th colspan="6">Abonos a deudas</th></tr><tr><th>Deuda</th><th>Monto</th><th>Fecha</th><th>Notas</th><th>Creacion</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(history.debtPayments())}"><td colspan="5" class="empty-cell">Sin abonos.</td></tr><tr th:each="row : ${history.debtPayments()}"><td th:text="${row.debtDescription()} ?: 'Sin descripcion'">Deuda</td><td th:text="${'$' + #numbers.formatDecimal(row.amount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.paymentDate()}">Fecha</td><td th:text="${row.notes()} ?: 'Sin notas'">Notas</td><td th:text="${#temporals.format(row.createdAt(), 'yyyy-MM-dd HH:mm')}">Creacion</td></tr></tbody></table>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/reports.js}"></script>
+</body>
+</html>

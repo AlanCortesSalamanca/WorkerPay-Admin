@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen financiero | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle='Resumen financiero'" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro"><div><p class="section-kicker">Reportes</p><h2>Resumen general financiero</h2></div><div class="actions-cell"><a class="button button-secondary" th:href="@{/reports}">Volver</a><a class="button button-primary" th:href="@{/reports/export/financial-summary}">Exportar CSV</a></div></section>
+        <section class="dashboard-grid">
+            <article class="summary-card"><span>Trabajadores activos</span><strong th:text="${summary.activeWorkersCount()}">0</strong></article>
+            <article class="summary-card"><span>Adelantos pendientes</span><strong th:text="${summary.pendingAdvancesCount()}">0</strong><small th:text="${'$' + #numbers.formatDecimal(summary.pendingAdvancesTotal(), 1, 'COMMA', 2, 'POINT')}">$0.00</small></article>
+            <article class="summary-card"><span>Deudas activas</span><strong th:text="${summary.activeDebtsCount()}">0</strong><small th:text="${'$' + #numbers.formatDecimal(summary.activeDebtsTotal(), 1, 'COMMA', 2, 'POINT')}">$0.00</small></article>
+            <article class="summary-card"><span>Pagos pendientes</span><strong th:text="${summary.pendingPaymentsCount()}">0</strong></article>
+            <article class="summary-card"><span>Total pagado</span><strong th:text="${'$' + #numbers.formatDecimal(summary.paidPaymentsTotal(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+            <article class="summary-card"><span>Total neto pagado</span><strong th:text="${'$' + #numbers.formatDecimal(summary.netPaidTotal(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+            <article class="summary-card"><span>Descuentos aplicados</span><strong th:text="${'$' + #numbers.formatDecimal(summary.totalDiscounts(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+        </section>
+        <section class="table-panel table-panel-spaced">
+            <table><thead><tr><th colspan="10">Ultimos pagos</th></tr><tr><th>Periodo</th><th>Trabajador</th><th>Neto</th><th>Estado</th><th>Fecha</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(summary.recentPayments())}"><td colspan="5" class="empty-cell">Sin pagos recientes.</td></tr><tr th:each="row : ${summary.recentPayments()}"><td th:text="${row.periodName()}">Periodo</td><td th:text="${row.workerName()}">Trabajador</td><td th:text="${'$' + #numbers.formatDecimal(row.netPayment(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.status()}">Estado</td><td th:text="${row.paymentDate()}">Fecha</td></tr></tbody></table>
+        </section>
+        <section class="table-panel table-panel-spaced">
+            <table><thead><tr><th colspan="7">Ultimos adelantos pendientes</th></tr><tr><th>Trabajador</th><th>Puesto</th><th>Monto</th><th>Fecha</th><th>Motivo</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(summary.recentAdvances())}"><td colspan="5" class="empty-cell">Sin adelantos pendientes.</td></tr><tr th:each="row : ${summary.recentAdvances()}"><td th:text="${row.workerName()}">Trabajador</td><td th:text="${row.workerPosition()}">Puesto</td><td th:text="${'$' + #numbers.formatDecimal(row.amount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.date()}">Fecha</td><td th:text="${row.reason()} ?: 'Sin motivo'">Motivo</td></tr></tbody></table>
+        </section>
+        <section class="table-panel table-panel-spaced">
+            <table><thead><tr><th colspan="8">Deudas activas recientes</th></tr><tr><th>Trabajador</th><th>Puesto</th><th>Saldo</th><th>Abono sugerido</th><th>Descripcion</th></tr></thead><tbody><tr th:if="${#lists.isEmpty(summary.recentDebts())}"><td colspan="5" class="empty-cell">Sin deudas activas.</td></tr><tr th:each="row : ${summary.recentDebts()}"><td th:text="${row.workerName()}">Trabajador</td><td th:text="${row.workerPosition()}">Puesto</td><td th:text="${'$' + #numbers.formatDecimal(row.currentBalance(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${'$' + #numbers.formatDecimal(row.suggestedPayment(), 1, 'COMMA', 2, 'POINT')}">$0.00</td><td th:text="${row.description()} ?: 'Sin descripcion'">Descripcion</td></tr></tbody></table>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/reports.js}"></script>
+</body>
+</html>

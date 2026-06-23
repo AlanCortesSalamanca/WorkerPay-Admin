@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface DebtPaymentRepository extends JpaRepository<DebtPayment, Long> {
 
     List<DebtPayment> findByDebtIdOrderByPaymentDateDesc(Long debtId);
+
+    List<DebtPayment> findByDebtWorkerId(Long workerId);
 }

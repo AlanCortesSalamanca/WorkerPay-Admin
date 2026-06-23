@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adelantos pendientes | WorkerPay Admin</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/forms.css}">
+    <link rel="stylesheet" th:href="@{/css/tables.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<div class="app-shell">
+    <div th:replace="~{layout/sidebar :: sidebar}"></div>
+    <main class="content-shell">
+        <div th:with="pageTitle='Adelantos pendientes'" th:replace="~{layout/navbar :: navbar}"></div>
+        <section class="page-intro"><div><p class="section-kicker">Reportes</p><h2>Adelantos pendientes</h2></div><a class="button button-secondary" th:href="@{/reports}">Volver</a></section>
+        <form class="form-panel report-filter-panel" method="get" th:action="@{/reports/advances-pending}" th:object="${filter}">
+            <div class="form-grid">
+                <div class="form-group"><label for="workerId">Trabajador</label><select id="workerId" th:field="*{workerId}"><option value="">Todos</option><option th:each="worker : ${workers}" th:value="${worker.id}" th:text="${worker.fullName}">Trabajador</option></select></div>
+                <div class="form-group"><label for="startDate">Fecha inicio</label><input id="startDate" type="date" th:field="*{startDate}"></div>
+                <div class="form-group"><label for="endDate">Fecha fin</label><input id="endDate" type="date" th:field="*{endDate}"></div>
+            </div>
+            <div class="form-actions">
+                <a class="button button-secondary" th:href="@{/reports/advances-pending}">Limpiar filtros</a>
+                <a class="button button-secondary" th:href="@{/reports/export/advances-pending(workerId=${filter.workerId},startDate=${filter.startDate},endDate=${filter.endDate})}">Exportar CSV</a>
+                <button class="button button-primary" type="submit">Filtrar</button>
+            </div>
+        </form>
+        <section class="dashboard-grid report-totals">
+            <article class="summary-card"><span>Cantidad pendiente</span><strong th:text="${totals.count()}">0</strong></article>
+            <article class="summary-card"><span>Total pendiente</span><strong th:text="${'$' + #numbers.formatDecimal(totals.totalAmount(), 1, 'COMMA', 2, 'POINT')}">$0.00</strong></article>
+        </section>
+        <section class="table-panel table-panel-spaced">
+            <table>
+                <thead><tr><th>Trabajador</th><th>Puesto</th><th>Monto</th><th>Fecha</th><th>Motivo</th><th>Estado</th><th>Creacion</th></tr></thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(rows)}"><td colspan="7" class="empty-cell">No hay adelantos pendientes.</td></tr>
+                <tr th:each="row : ${rows}">
+                    <td th:text="${row.workerName()}">Trabajador</td><td th:text="${row.workerPosition()}">Puesto</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(row.amount(), 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td th:text="${row.date()}">2026-01-01</td><td th:text="${row.reason()} ?: 'Sin motivo'">Motivo</td>
+                    <td><span class="status-pill advance-PENDING">Pendiente</span></td>
+                    <td th:text="${#temporals.format(row.createdAt(), 'yyyy-MM-dd HH:mm')}">2026-01-01</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/reports.js}"></script>
+</body>
+</html>

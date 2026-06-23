@@ -101,6 +101,13 @@
 
 .report-card .button {
     align-self: end;
-    opacity: 0.7;
-    pointer-events: none;
+}
+
+.report-filter-panel,
+.report-totals {
+    margin-bottom: 20px;
+}
+
+.report-totals {
+    margin-top: 20px;
 }

@@ -161,6 +161,63 @@ Entra con el usuario y contrasena configurados mediante:
 - `APP_ADMIN_USERNAME`
 - `APP_ADMIN_PASSWORD`
 
+## Datos demo
+
+El proyecto incluye un script manual para poblar la base local con datos de prueba reproducibles:
+
+```text
+src/main/resources/db/demo-data.sql
+```
+
+Este script no se ejecuta automaticamente al iniciar la aplicacion. Esta pensado solo para desarrollo local y no borra usuarios, roles ni datos reales.
+
+Pasos recomendados:
+
+1. Asegurate de tener PostgreSQL corriendo.
+2. Crea la base de datos `workerpay_db` si todavia no existe.
+3. Ejecuta la aplicacion una vez para que Hibernate cree las tablas.
+4. Deten la aplicacion.
+5. Ejecuta el script demo.
+
+Desde una terminal con `psql` disponible:
+
+```bash
+psql -U workerpay_user -d workerpay_db -f src/main/resources/db/demo-data.sql
+```
+
+Desde SQL Shell / psql:
+
+```sql
+\c workerpay_db
+\i 'D:/proyectsCodex/WorkerPay Admin/src/main/resources/db/demo-data.sql'
+```
+
+La ruta puede cambiar segun la ubicacion local donde tengas el proyecto.
+
+### Nota para Windows
+
+Si antes hubo un error y SQL Shell quedo con una transaccion abortada, ejecuta primero:
+
+```sql
+ROLLBACK;
+```
+
+Luego fuerza UTF-8 en la sesion y ejecuta el script:
+
+```sql
+\encoding UTF8
+\i 'D:/proyectsCodex/WorkerPay Admin/src/main/resources/db/demo-data.sql'
+```
+
+Alternativa desde PowerShell:
+
+```powershell
+chcp 65001
+psql -U workerpay_user -d workerpay_db -f "src/main/resources/db/demo-data.sql"
+```
+
+El script agrega trabajadores, adelantos, deudas, abonos, periodos y pagos demo para probar dashboard, reportes y exportacion CSV. Tambien incluye consultas finales de verificacion con conteos y totales principales.
+
 ## Rutas principales
 
 - `/login`

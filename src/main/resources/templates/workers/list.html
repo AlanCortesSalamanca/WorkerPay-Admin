@@ -43,7 +43,7 @@
                     <td>
                         <span class="status-pill payment-pill" th:classappend="${' payment-' + worker.paymentType}" th:text="${worker.paymentType}">WEEKLY</span>
                     </td>
-                    <td th:text="${#numbers.formatCurrency(worker.baseSalary)}">$0.00</td>
+                    <td th:text="${'$' + #numbers.formatDecimal(worker.baseSalary, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                     <td>
                         <span class="status-pill" th:classappend="${worker.active} ? ' status-active' : ' status-muted'" th:text="${worker.active} ? 'Activo' : 'Inactivo'">Activo</span>
                     </td>

@@ -8,6 +8,8 @@ public interface WorkerService {
 
     List<Worker> findAll();
 
+    List<Worker> findActive();
+
     Worker findById(Long id);
 
     Worker create(WorkerForm form);

@@ -34,7 +34,7 @@
                 <div><dt>Telefono</dt><dd th:text="${worker.phone} ?: 'Sin telefono'">Telefono</dd></div>
                 <div><dt>Puesto</dt><dd th:text="${worker.position}">Puesto</dd></div>
                 <div><dt>Tipo de pago</dt><dd><span class="status-pill payment-pill" th:classappend="${' payment-' + worker.paymentType}" th:text="${worker.paymentType}">WEEKLY</span></dd></div>
-                <div><dt>Sueldo base</dt><dd th:text="${#numbers.formatCurrency(worker.baseSalary)}">$0.00</dd></div>
+                <div><dt>Sueldo base</dt><dd th:text="${'$' + #numbers.formatDecimal(worker.baseSalary, 1, 'COMMA', 2, 'POINT')}">$0.00</dd></div>
                 <div><dt>Fecha de ingreso</dt><dd th:text="${worker.hireDate}">2026-01-01</dd></div>
                 <div><dt>Estado</dt><dd><span class="status-pill" th:classappend="${worker.active} ? ' status-active' : ' status-muted'" th:text="${worker.active} ? 'Activo' : 'Inactivo'">Activo</span></dd></div>
             </dl>

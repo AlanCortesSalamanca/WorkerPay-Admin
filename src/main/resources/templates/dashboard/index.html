@@ -43,7 +43,7 @@
             </article>
             <article class="summary-card">
                 <span>Total pagado del periodo</span>
-                <strong th:text="${#numbers.formatCurrency(periodPaidTotal)}">$0.00</strong>
+                <strong th:text="${'$' + #numbers.formatDecimal(periodPaidTotal, 1, 'COMMA', 2, 'POINT')}">$0.00</strong>
                 <small>Acumulado del periodo actual.</small>
             </article>
         </section>
@@ -54,7 +54,7 @@
             </div>
             <div class="quick-actions-grid">
                 <a class="quick-action" th:href="@{/workers}"><strong>Trabajadores</strong><span>Gestionar altas, edicion y estado.</span></a>
-                <span class="quick-action quick-action-disabled"><strong>Adelantos</strong><span>Modulo preparado para fase futura.</span></span>
+                <a class="quick-action" th:href="@{/advances}"><strong>Adelantos</strong><span>Registrar y consultar adelantos pendientes.</span></a>
                 <span class="quick-action quick-action-disabled"><strong>Deudas</strong><span>Modulo preparado para fase futura.</span></span>
                 <span class="quick-action quick-action-disabled"><strong>Pagos</strong><span>Modulo preparado para fase futura.</span></span>
                 <a class="quick-action" th:href="@{/reports}"><strong>Reportes</strong><span>Consultar reportes administrativos.</span></a>

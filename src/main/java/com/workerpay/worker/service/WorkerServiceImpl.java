@@ -27,6 +27,12 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Worker> findActive() {
+        return workerRepository.findByActiveTrueOrderByFullNameAsc();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Worker findById(Long id) {
         return workerRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Trabajador no encontrado"));

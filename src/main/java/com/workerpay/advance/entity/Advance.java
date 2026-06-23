@@ -40,4 +40,48 @@ public class Advance extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AdvanceStatus status = AdvanceStatus.PENDING;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Worker getWorker() {
+        return worker;
+    }
+
+    public void setWorker(Worker worker) {
+        this.worker = worker;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public AdvanceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AdvanceStatus status) {
+        this.status = status;
+    }
 }

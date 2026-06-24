@@ -9,28 +9,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.workerpay.advance.service.AdvanceService;
 import com.workerpay.auth.service.CustomUserDetailsService;
+import com.workerpay.config.SecurityConfig;
 import com.workerpay.worker.service.WorkerService;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AdvanceController.class)
+@Import(SecurityConfig.class)
 class AdvanceControllerWebMvcTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private AdvanceService advanceService;
 
-    @MockBean
+    @MockitoBean
     private WorkerService workerService;
 
-    @MockBean
+    @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
 
     @WithMockUser(roles = "ADMIN")
@@ -59,5 +62,29 @@ class AdvanceControllerWebMvcTests {
         mockMvc.perform(post("/advances").with(csrf()))
             .andExpect(status().isOk())
             .andExpect(view().name("advances/form"));
+    }
+
+    @WithMockUser(roles = "OPERATOR")
+    @Test
+    void operatorCanListAdvances() throws Exception {
+        when(advanceService.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/advances"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("advances/list"));
+    }
+
+    @WithMockUser(roles = "OPERATOR")
+    @Test
+    void operatorCannotOpenAdvanceForm() throws Exception {
+        mockMvc.perform(get("/advances/new"))
+            .andExpect(status().isForbidden());
+    }
+
+    @WithMockUser(roles = "OPERATOR")
+    @Test
+    void operatorCannotCreateAdvance() throws Exception {
+        mockMvc.perform(post("/advances").with(csrf()))
+            .andExpect(status().isForbidden());
     }
 }

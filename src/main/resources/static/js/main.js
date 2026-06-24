@@ -8,6 +8,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    document.querySelectorAll(".sidebar-nav a").forEach((link) => {
+        link.addEventListener("click", () => {
+            document.body.classList.remove("sidebar-open");
+        });
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            document.body.classList.remove("sidebar-open");
+        }
+    });
+
     document.querySelectorAll(".alert-dismissible").forEach((alert) => {
         alert.setAttribute("title", "Click para cerrar");
         alert.addEventListener("click", () => {

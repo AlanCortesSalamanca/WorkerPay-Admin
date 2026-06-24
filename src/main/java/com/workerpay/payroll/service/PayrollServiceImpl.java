@@ -5,6 +5,11 @@ import com.workerpay.advance.entity.AdvanceStatus;
 import com.workerpay.advance.repository.AdvanceRepository;
 import com.workerpay.common.exception.ResourceNotFoundException;
 import com.workerpay.common.util.MoneyUtils;
+import com.workerpay.debt.entity.Debt;
+import com.workerpay.debt.entity.DebtPayment;
+import com.workerpay.debt.entity.DebtStatus;
+import com.workerpay.debt.repository.DebtPaymentRepository;
+import com.workerpay.debt.repository.DebtRepository;
 import com.workerpay.payroll.dto.PayrollPaymentForm;
 import com.workerpay.payroll.entity.PaymentPeriod;
 import com.workerpay.payroll.entity.PaymentPeriodStatus;
@@ -15,6 +20,7 @@ import com.workerpay.payroll.repository.PayrollPaymentRepository;
 import com.workerpay.worker.entity.Worker;
 import com.workerpay.worker.service.WorkerService;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -28,17 +34,23 @@ public class PayrollServiceImpl implements PayrollService {
     private final PaymentPeriodRepository paymentPeriodRepository;
     private final WorkerService workerService;
     private final AdvanceRepository advanceRepository;
+    private final DebtRepository debtRepository;
+    private final DebtPaymentRepository debtPaymentRepository;
 
     public PayrollServiceImpl(
         PayrollPaymentRepository payrollPaymentRepository,
         PaymentPeriodRepository paymentPeriodRepository,
         WorkerService workerService,
-        AdvanceRepository advanceRepository
+        AdvanceRepository advanceRepository,
+        DebtRepository debtRepository,
+        DebtPaymentRepository debtPaymentRepository
     ) {
         this.payrollPaymentRepository = payrollPaymentRepository;
         this.paymentPeriodRepository = paymentPeriodRepository;
         this.workerService = workerService;
         this.advanceRepository = advanceRepository;
+        this.debtRepository = debtRepository;
+        this.debtPaymentRepository = debtPaymentRepository;
     }
 
     @Override
@@ -114,6 +126,7 @@ public class PayrollServiceImpl implements PayrollService {
         PayrollPayment payment = findPaymentById(id);
         requirePending(payment, "Solo se pueden marcar como pagados los pagos pendientes.");
         boolean advancesMatched = markAdvancesIfExact(payment);
+        applyDebtDiscount(payment);
         payment.setStatus(PayrollPaymentStatus.PAID);
         payrollPaymentRepository.save(payment);
         return advancesMatched;
@@ -233,5 +246,49 @@ public class PayrollServiceImpl implements PayrollService {
         pendingAdvances.forEach(advance -> advance.setStatus(AdvanceStatus.DISCOUNTED));
         advanceRepository.saveAll(pendingAdvances);
         return true;
+    }
+
+    private void applyDebtDiscount(PayrollPayment payment) {
+        BigDecimal remainingDiscount = MoneyUtils.normalize(payment.getDebtDiscount());
+        if (remainingDiscount.compareTo(BigDecimal.ZERO) == 0) {
+            return;
+        }
+        List<Debt> activeDebts = debtRepository.findByWorkerIdAndStatus(
+            payment.getWorker().getId(),
+            DebtStatus.ACTIVE
+        ).stream()
+            .sorted(Comparator.comparing(Debt::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
+            .toList();
+        BigDecimal activeBalance = activeDebts.stream()
+            .map(Debt::getCurrentBalance)
+            .map(MoneyUtils::normalize)
+            .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
+        if (remainingDiscount.compareTo(activeBalance) > 0) {
+            throw new IllegalStateException("El descuento por deuda supera el saldo activo del trabajador.");
+        }
+
+        List<DebtPayment> payments = new ArrayList<>();
+        for (Debt debt : activeDebts) {
+            if (remainingDiscount.compareTo(BigDecimal.ZERO) == 0) {
+                break;
+            }
+            BigDecimal debtBalance = MoneyUtils.normalize(debt.getCurrentBalance());
+            BigDecimal appliedAmount = remainingDiscount.min(debtBalance);
+            DebtPayment debtPayment = new DebtPayment();
+            debtPayment.setDebt(debt);
+            debtPayment.setAmount(appliedAmount);
+            debtPayment.setPaymentDate(payment.getPaymentDate());
+            debtPayment.setNotes("Descuento aplicado desde pago de nomina.");
+            payments.add(debtPayment);
+
+            BigDecimal newBalance = debtBalance.subtract(appliedAmount);
+            debt.setCurrentBalance(MoneyUtils.normalize(newBalance));
+            if (debt.getCurrentBalance().compareTo(BigDecimal.ZERO) == 0) {
+                debt.setStatus(DebtStatus.PAID);
+            }
+            remainingDiscount = remainingDiscount.subtract(appliedAmount);
+        }
+        debtRepository.saveAll(activeDebts);
+        debtPaymentRepository.saveAll(payments);
     }
 }

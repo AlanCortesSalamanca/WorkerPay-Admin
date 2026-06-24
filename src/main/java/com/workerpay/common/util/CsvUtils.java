@@ -21,7 +21,7 @@ public final class CsvUtils {
     }
 
     public static String cell(Object value) {
-        String text = text(value);
+        String text = neutralizeFormula(text(value));
         boolean shouldQuote = text.contains(",") || text.contains("\"") || text.contains("\n") || text.contains("\r");
         String escaped = text.replace("\"", "\"\"");
         return shouldQuote ? "\"" + escaped + "\"" : escaped;
@@ -45,5 +45,16 @@ public final class CsvUtils {
 
     public static String money(BigDecimal amount) {
         return "$" + MoneyUtils.normalize(amount);
+    }
+
+    private static String neutralizeFormula(String text) {
+        if (text.isEmpty()) {
+            return text;
+        }
+        char first = text.charAt(0);
+        if (first == '=' || first == '+' || first == '-' || first == '@' || first == '\t' || first == '\r') {
+            return "'" + text;
+        }
+        return text;
     }
 }

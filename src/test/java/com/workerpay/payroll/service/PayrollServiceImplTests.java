@@ -3,9 +3,14 @@ package com.workerpay.payroll.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.workerpay.advance.repository.AdvanceRepository;
+import com.workerpay.debt.entity.Debt;
+import com.workerpay.debt.entity.DebtStatus;
+import com.workerpay.debt.repository.DebtPaymentRepository;
+import com.workerpay.debt.repository.DebtRepository;
 import com.workerpay.payroll.dto.PayrollPaymentForm;
 import com.workerpay.payroll.entity.PaymentPeriod;
 import com.workerpay.payroll.entity.PaymentPeriodStatus;
@@ -41,11 +46,24 @@ class PayrollServiceImplTests {
     @Mock
     private AdvanceRepository advanceRepository;
 
+    @Mock
+    private DebtRepository debtRepository;
+
+    @Mock
+    private DebtPaymentRepository debtPaymentRepository;
+
     private PayrollServiceImpl payrollService;
 
     @BeforeEach
     void setUp() {
-        payrollService = new PayrollServiceImpl(payrollPaymentRepository, paymentPeriodRepository, workerService, advanceRepository);
+        payrollService = new PayrollServiceImpl(
+            payrollPaymentRepository,
+            paymentPeriodRepository,
+            workerService,
+            advanceRepository,
+            debtRepository,
+            debtPaymentRepository
+        );
     }
 
     @Test
@@ -109,6 +127,21 @@ class PayrollServiceImplTests {
             .hasMessageContaining("Ya existe");
     }
 
+    @Test
+    void markAsPaidAppliesDebtDiscountToActiveDebt() {
+        PayrollPayment payment = payment(PayrollPaymentStatus.PENDING);
+        Debt debt = debt("100.00");
+        when(payrollPaymentRepository.findById(5L)).thenReturn(Optional.of(payment));
+        when(debtRepository.findByWorkerIdAndStatus(1L, DebtStatus.ACTIVE)).thenReturn(java.util.List.of(debt));
+
+        payrollService.markAsPaid(5L);
+
+        assertThat(debt.getCurrentBalance()).isEqualByComparingTo("75.00");
+        assertThat(debt.getStatus()).isEqualTo(DebtStatus.ACTIVE);
+        assertThat(payment.getStatus()).isEqualTo(PayrollPaymentStatus.PAID);
+        verify(debtPaymentRepository).saveAll(any());
+    }
+
     private PayrollPaymentForm form() {
         PayrollPaymentForm form = new PayrollPaymentForm();
         form.setWorkerId(1L);
@@ -127,7 +160,27 @@ class PayrollServiceImplTests {
         payment.setWorker(worker(1L));
         payment.setPeriod(period(2L, PaymentPeriodStatus.OPEN));
         payment.setStatus(status);
+        payment.setBaseAmount(new BigDecimal("1000.00"));
+        payment.setBonuses(new BigDecimal("50.00"));
+        payment.setAdvanceDiscount(new BigDecimal("0.00"));
+        payment.setDebtDiscount(new BigDecimal("25.00"));
+        payment.setOtherDiscounts(new BigDecimal("25.00"));
+        payment.setNetPayment(new BigDecimal("1000.00"));
+        payment.setPaymentDate(LocalDate.of(2026, 6, 22));
         return payment;
+    }
+
+    private Debt debt(String balance) {
+        Debt debt = new Debt();
+        debt.setWorker(worker(1L));
+        debt.setOriginalAmount(new BigDecimal("100.00"));
+        debt.setCurrentBalance(new BigDecimal(balance));
+        debt.setSuggestedPayment(new BigDecimal("25.00"));
+        debt.setDescription("Prestamo");
+        debt.setStatus(DebtStatus.ACTIVE);
+        ReflectionTestUtils.setField(debt, "createdAt", java.time.LocalDateTime.of(2026, 6, 1, 10, 0));
+        ReflectionTestUtils.setField(debt, "updatedAt", java.time.LocalDateTime.of(2026, 6, 1, 10, 0));
+        return debt;
     }
 
     private Worker worker(Long id) {

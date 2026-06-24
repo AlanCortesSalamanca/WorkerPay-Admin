@@ -72,8 +72,10 @@ La aplicacion lee:
 - `DB_PASSWORD`
 - `APP_ADMIN_USERNAME`
 - `APP_ADMIN_PASSWORD`
+- `SPRING_PROFILES_ACTIVE` para seleccionar perfil. Usa `dev` solo en desarrollo local.
 
 El usuario administrador inicial se crea automaticamente si todavia no existe ningun usuario con rol `ADMIN`. La contrasena se guarda con BCrypt.
+Usa una contrasena de al menos 12 caracteres para `APP_ADMIN_PASSWORD`.
 
 ### Windows PowerShell
 
@@ -83,6 +85,7 @@ $env:DB_USERNAME="workerpay_user"
 $env:DB_PASSWORD="TU_PASSWORD_LOCAL"
 $env:APP_ADMIN_USERNAME="admin"
 $env:APP_ADMIN_PASSWORD="TU_PASSWORD_ADMIN_LOCAL"
+$env:SPRING_PROFILES_ACTIVE="dev"
 
 .\mvnw.cmd spring-boot:run
 ```
@@ -95,6 +98,7 @@ set DB_USERNAME=workerpay_user
 set DB_PASSWORD=TU_PASSWORD_LOCAL
 set APP_ADMIN_USERNAME=admin
 set APP_ADMIN_PASSWORD=TU_PASSWORD_ADMIN_LOCAL
+set SPRING_PROFILES_ACTIVE=dev
 
 .\mvnw.cmd spring-boot:run
 ```
@@ -107,6 +111,7 @@ export DB_USERNAME="workerpay_user"
 export DB_PASSWORD="TU_PASSWORD_LOCAL"
 export APP_ADMIN_USERNAME="admin"
 export APP_ADMIN_PASSWORD="TU_PASSWORD_ADMIN_LOCAL"
+export SPRING_PROFILES_ACTIVE="dev"
 
 ./mvnw spring-boot:run
 ```
@@ -129,6 +134,8 @@ Iniciar la aplicacion:
 .\mvnw.cmd spring-boot:run
 ```
 
+Para desarrollo local, ejecuta con `SPRING_PROFILES_ACTIVE=dev`. Ese perfil habilita `ddl-auto=update`, SQL en consola y cache de Thymeleaf desactivado.
+
 ### Linux / macOS
 
 Compilar:
@@ -142,6 +149,8 @@ Iniciar la aplicacion:
 ```bash
 ./mvnw spring-boot:run
 ```
+
+Para desarrollo local, ejecuta con `SPRING_PROFILES_ACTIVE=dev`. Ese perfil habilita `ddl-auto=update`, SQL en consola y cache de Thymeleaf desactivado.
 
 Si tienes Maven instalado globalmente, tambien puedes usar:
 

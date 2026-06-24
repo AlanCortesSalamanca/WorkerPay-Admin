@@ -3,6 +3,7 @@ package com.workerpay.config;
 import com.workerpay.auth.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,15 +27,34 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/css/**", "/js/**", "/img/**").permitAll()
                 .requestMatchers("/dashboard").authenticated()
-                .requestMatchers(
+                .requestMatchers("/users/**", "/reports/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST,
                     "/workers/**",
                     "/advances/**",
                     "/debts/**",
                     "/payroll/**",
-                    "/payment-periods/**",
-                    "/reports/**"
+                    "/payment-periods/**"
+                ).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET,
+                    "/workers/new",
+                    "/workers/*/edit",
+                    "/advances/new",
+                    "/advances/*/edit",
+                    "/debts/new",
+                    "/debts/*/edit",
+                    "/debts/*/payments/new",
+                    "/payroll/new",
+                    "/payroll/*/edit",
+                    "/payment-periods/new",
+                    "/payment-periods/*/edit"
+                ).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET,
+                    "/workers/**",
+                    "/advances/**",
+                    "/debts/**",
+                    "/payroll/**",
+                    "/payment-periods/**"
                 ).hasAnyRole("ADMIN", "OPERATOR")
-                .requestMatchers("/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -54,8 +74,7 @@ public class SecurityConfig {
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }

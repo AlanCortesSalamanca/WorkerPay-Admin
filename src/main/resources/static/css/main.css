@@ -1,22 +1,26 @@
 :root {
-    --color-bg: #f4f5f7;
+    --color-bg: #f8f9fa;
     --color-surface: #ffffff;
     --color-surface-soft: #f3f4f6;
-    --color-surface-strong: #edeef0;
-    --color-text: #191c1e;
-    --color-muted: #434654;
-    --color-border: #dfe1e6;
-    --color-primary: #0052cc;
-    --color-primary-dark: #003d9b;
+    --color-surface-strong: #e5e7eb;
+    --color-text: #111827;
+    --color-muted: #6b7280;
+    --color-border: #e5e7eb;
+    --color-border-strong: #d1d5db;
+    --color-primary: #1a56db;
+    --color-primary-dark: #003fb1;
+    --color-primary-soft: #dbeafe;
     --color-success: #166534;
     --color-danger: #ba1a1a;
-    --color-warning: #a33500;
-    --color-sidebar: #101c2d;
-    --color-sidebar-soft: #17263a;
-    --shadow-sm: 0 2px 4px rgba(17, 24, 39, 0.04);
-    --shadow-md: 0 8px 16px rgba(17, 24, 39, 0.08);
+    --color-warning: #a16207;
+    --color-sidebar: #111827;
+    --color-sidebar-soft: #1f2937;
+    --color-sidebar-border: #2d3748;
+    --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.05);
+    --shadow-md: 0 10px 24px rgba(17, 24, 39, 0.08);
     --radius: 8px;
     --radius-sm: 4px;
+    --focus-ring: 0 0 0 3px rgba(26, 86, 219, 0.14);
 }
 
 * {
@@ -24,6 +28,7 @@
 }
 
 html {
+    background: var(--color-bg);
     min-width: 320px;
 }
 
@@ -43,12 +48,22 @@ a {
 
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
 }
 
 button {
     border: 0;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
 }
 
 .button {
@@ -61,10 +76,14 @@ button {
     font-weight: 700;
     gap: 8px;
     justify-content: center;
-    min-height: 36px;
+    min-height: 38px;
     padding: 0 14px;
-    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
     white-space: nowrap;
+}
+
+.button:hover {
+    box-shadow: var(--shadow-sm);
 }
 
 .button-primary {
@@ -78,18 +97,24 @@ button {
 
 .button-secondary {
     background: var(--color-surface);
-    border-color: var(--color-border);
+    border-color: var(--color-border-strong);
     color: var(--color-text);
 }
 
 .button-secondary:hover {
-    border-color: #737685;
+    border-color: #9ca3af;
 }
 
 .button-warning {
     background: #fff7ed;
     border-color: #fed7aa;
     color: var(--color-warning);
+}
+
+.button-danger {
+    background: #ffdad6;
+    border-color: #fecaca;
+    color: var(--color-danger);
 }
 
 .button-full {
@@ -110,10 +135,17 @@ button {
     color: var(--color-success);
 }
 
-.alert-danger {
+.alert-danger,
+.alert-error {
     background: #ffdad6;
     border-color: #fecaca;
     color: var(--color-danger);
+}
+
+.alert-warning {
+    background: #fef3c7;
+    border-color: #fde68a;
+    color: var(--color-warning);
 }
 
 .alert-dismissible {
@@ -126,6 +158,14 @@ button {
     gap: 16px;
     justify-content: space-between;
     margin-bottom: 20px;
+}
+
+.page-actions {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
 }
 
 .page-intro h2,
@@ -144,6 +184,20 @@ button {
     text-transform: uppercase;
 }
 
+.section-title {
+    align-items: center;
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.section-title h2,
+.section-title h3 {
+    font-size: 16px;
+    margin: 0;
+}
+
 .status-pill {
     align-items: center;
     border-radius: 999px;
@@ -153,16 +207,34 @@ button {
     justify-content: center;
     min-height: 24px;
     padding: 4px 10px;
+    white-space: nowrap;
 }
 
-.status-active {
+.status-active,
+.status-open,
+.status-paid,
+.status-completed {
     background: #dcfce7;
-    color: #166534;
+    color: var(--color-success);
+}
+
+.status-pending,
+.status-draft,
+.status-partial {
+    background: #fef3c7;
+    color: var(--color-warning);
+}
+
+.status-inactive,
+.status-cancelled,
+.status-overdue {
+    background: #ffdad6;
+    color: var(--color-danger);
 }
 
 .status-muted {
-    background: #e1e2e4;
-    color: #434654;
+    background: #e5e7eb;
+    color: #374151;
 }
 
 .surface-panel {
@@ -172,13 +244,31 @@ button {
     box-shadow: var(--shadow-sm);
 }
 
+.muted {
+    color: var(--color-muted);
+}
+
+.text-success {
+    color: var(--color-success);
+}
+
+.text-danger {
+    color: var(--color-danger);
+}
+
 @media (max-width: 720px) {
     .page-intro {
         align-items: stretch;
         flex-direction: column;
     }
 
-    .page-intro .button {
+    .page-intro .button,
+    .page-actions .button {
         width: 100%;
+    }
+
+    .page-actions {
+        align-items: stretch;
+        flex-direction: column;
     }
 }

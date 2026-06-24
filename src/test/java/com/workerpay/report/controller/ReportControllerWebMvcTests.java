@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.workerpay.auth.service.CustomUserDetailsService;
+import com.workerpay.config.SecurityConfig;
 import com.workerpay.payroll.service.PaymentPeriodService;
 import com.workerpay.report.dto.FinancialSummaryDTO;
 import com.workerpay.report.dto.ReportFilterForm;
@@ -15,27 +16,29 @@ import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ReportController.class)
+@Import(SecurityConfig.class)
 class ReportControllerWebMvcTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private ReportService reportService;
 
-    @MockBean
+    @MockitoBean
     private WorkerService workerService;
 
-    @MockBean
+    @MockitoBean
     private PaymentPeriodService paymentPeriodService;
 
-    @MockBean
+    @MockitoBean
     private CustomUserDetailsService customUserDetailsService;
 
     @WithMockUser(roles = "ADMIN")
@@ -43,6 +46,13 @@ class ReportControllerWebMvcTests {
     void reportsIndexShouldReturnOk() throws Exception {
         mockMvc.perform(get("/reports"))
             .andExpect(status().isOk());
+    }
+
+    @WithMockUser(roles = "OPERATOR")
+    @Test
+    void operatorCannotViewReports() throws Exception {
+        mockMvc.perform(get("/reports"))
+            .andExpect(status().isForbidden());
     }
 
     @WithMockUser(roles = "ADMIN")

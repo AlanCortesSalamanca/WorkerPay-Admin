@@ -21,11 +21,10 @@ td {
 }
 
 th {
-    background: var(--color-surface-soft);
+    background: #f9fafb;
     color: var(--color-muted);
     font-size: 12px;
     font-weight: 900;
-    text-transform: uppercase;
 }
 
 tbody tr:hover {
@@ -39,6 +38,7 @@ tbody tr:last-child td {
 .empty-cell {
     color: var(--color-muted);
     font-weight: 700;
+    padding: 28px 16px;
     text-align: center;
 }
 
@@ -60,19 +60,20 @@ tbody tr:last-child td {
     margin: 0;
 }
 
-.payment-pill {
-    background: #dae2ff;
-    color: var(--color-primary-dark);
+.actions-cell .button {
+    min-height: 34px;
+    padding: 0 10px;
 }
 
+.payment-pill,
 .payment-WEEKLY {
-    background: #dae2ff;
-    color: var(--color-primary-dark);
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
 }
 
 .payment-BIWEEKLY {
     background: #f0fdf4;
-    color: #166534;
+    color: var(--color-success);
 }
 
 .payment-MONTHLY {

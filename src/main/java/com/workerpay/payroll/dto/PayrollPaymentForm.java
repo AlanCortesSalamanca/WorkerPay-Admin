@@ -1,6 +1,7 @@
 package com.workerpay.payroll.dto;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,18 +16,23 @@ public class PayrollPaymentForm {
 
     @NotNull(message = "El sueldo base es obligatorio.")
     @DecimalMin(value = "0.00", message = "El sueldo base debe ser mayor o igual a 0.")
+    @Digits(integer = 10, fraction = 2, message = "El sueldo base no puede superar 10 enteros y 2 decimales.")
     private BigDecimal baseAmount;
 
     @DecimalMin(value = "0.00", message = "Los bonos deben ser mayor o igual a 0.")
+    @Digits(integer = 10, fraction = 2, message = "Los bonos no pueden superar 10 enteros y 2 decimales.")
     private BigDecimal bonuses;
 
     @DecimalMin(value = "0.00", message = "El descuento por adelantos debe ser mayor o igual a 0.")
+    @Digits(integer = 10, fraction = 2, message = "El descuento por adelantos no puede superar 10 enteros y 2 decimales.")
     private BigDecimal advanceDiscount;
 
     @DecimalMin(value = "0.00", message = "El descuento por deuda debe ser mayor o igual a 0.")
+    @Digits(integer = 10, fraction = 2, message = "El descuento por deuda no puede superar 10 enteros y 2 decimales.")
     private BigDecimal debtDiscount;
 
     @DecimalMin(value = "0.00", message = "Otros descuentos deben ser mayor o igual a 0.")
+    @Digits(integer = 10, fraction = 2, message = "Otros descuentos no pueden superar 10 enteros y 2 decimales.")
     private BigDecimal otherDiscounts;
 
     @NotNull(message = "La fecha de pago es obligatoria.")

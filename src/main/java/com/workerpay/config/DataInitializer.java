@@ -59,5 +59,10 @@ public class DataInitializer implements CommandLineRunner {
                 "Faltan APP_ADMIN_USERNAME o APP_ADMIN_PASSWORD para crear el usuario administrador inicial."
             );
         }
+        if (adminPassword.length() < 12) {
+            throw new IllegalStateException(
+                "APP_ADMIN_PASSWORD debe tener al menos 12 caracteres para crear el usuario administrador inicial."
+            );
+        }
     }
 }

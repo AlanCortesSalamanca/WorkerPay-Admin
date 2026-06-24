@@ -1,6 +1,7 @@
 package com.workerpay.debt.dto;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
@@ -12,9 +13,11 @@ public class DebtForm {
 
     @NotNull(message = "El monto original es obligatorio.")
     @DecimalMin(value = "0.01", message = "El monto original debe ser mayor que 0.")
+    @Digits(integer = 10, fraction = 2, message = "El monto original no puede superar 10 enteros y 2 decimales.")
     private BigDecimal originalAmount;
 
     @DecimalMin(value = "0.00", message = "El abono sugerido debe ser mayor o igual a 0.")
+    @Digits(integer = 10, fraction = 2, message = "El abono sugerido no puede superar 10 enteros y 2 decimales.")
     private BigDecimal suggestedPayment;
 
     @Size(max = 255, message = "La descripcion no puede superar 255 caracteres.")

@@ -6,7 +6,10 @@
 
 .summary-card,
 .quick-actions-panel,
-.report-card {
+.report-card,
+.report-filter-panel,
+.report-totals,
+.report-table-panel {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
@@ -14,6 +17,7 @@
 }
 
 .summary-card {
+    border-top: 3px solid var(--color-primary);
     display: grid;
     gap: 10px;
     min-height: 148px;
@@ -27,6 +31,7 @@
 }
 
 .summary-card strong {
+    color: var(--color-text);
     font-size: 30px;
     line-height: 1.1;
 }
@@ -49,13 +54,14 @@
 }
 
 .quick-action {
-    background: var(--color-surface);
+    background: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
     display: grid;
     gap: 4px;
     min-height: 92px;
     padding: 16px;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .quick-action:hover {
@@ -65,6 +71,7 @@
 
 .quick-action strong,
 .report-card h3 {
+    color: var(--color-text);
     font-size: 16px;
     margin: 0;
 }
@@ -89,9 +96,9 @@
 
 .report-icon {
     align-items: center;
-    background: #dae2ff;
+    background: var(--color-primary-soft);
     border-radius: var(--radius-sm);
-    color: var(--color-primary-dark);
+    color: var(--color-primary);
     display: inline-flex;
     font-weight: 900;
     height: 36px;
@@ -104,10 +111,63 @@
 }
 
 .report-filter-panel,
+.report-totals,
+.report-table-panel {
+    padding: 18px;
+}
+
+.report-filter-panel,
 .report-totals {
     margin-bottom: 20px;
 }
 
+.report-filter-form {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.report-filter-form label {
+    display: grid;
+    gap: 6px;
+    font-weight: 800;
+}
+
+.report-filter-form input,
+.report-filter-form select {
+    background: #ffffff;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    min-height: 40px;
+    min-width: 200px;
+    padding: 0 12px;
+}
+
+.report-filter-form input:focus,
+.report-filter-form select:focus {
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+    outline: none;
+}
+
 .report-totals {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     margin-top: 20px;
+}
+
+.report-total-item span {
+    color: var(--color-muted);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.report-total-item strong {
+    color: var(--color-text);
+    display: block;
+    font-size: 22px;
+    line-height: 1.2;
+    margin-top: 4px;
 }

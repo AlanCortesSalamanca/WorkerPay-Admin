@@ -8,12 +8,15 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "workers")
+@Table(name = "workers", indexes = {
+    @Index(name = "idx_workers_active", columnList = "active")
+})
 public class Worker extends BaseEntity {
 
     @Id

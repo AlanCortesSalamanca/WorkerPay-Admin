@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error interno</title>
+</head>
+<body>
+<main>
+    <h1>Error interno</h1>
+    <p th:text="${message}">Ha ocurrido un error interno.</p>
+    <a th:href="@{/dashboard}">Volver al inicio</a>
+</main>
+</body>
+</html>

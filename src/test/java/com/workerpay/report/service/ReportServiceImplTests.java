@@ -74,8 +74,11 @@ class ReportServiceImplTests {
         when(workerRepository.countByActiveTrue()).thenReturn(2L);
         when(advanceRepository.findByStatus(AdvanceStatus.PENDING)).thenReturn(List.of(advance(AdvanceStatus.PENDING, "100.00")));
         when(debtRepository.findByStatus(DebtStatus.ACTIVE)).thenReturn(List.of(debt(DebtStatus.ACTIVE, "300.00")));
-        when(payrollPaymentRepository.findAll()).thenReturn(List.of(paid, pending));
+        when(payrollPaymentRepository.findWithRelationsByStatus(PayrollPaymentStatus.PAID)).thenReturn(List.of(paid));
         when(payrollPaymentRepository.countByStatus(PayrollPaymentStatus.PENDING)).thenReturn(1L);
+        when(payrollPaymentRepository.findTop5ByOrderByPaymentDateDesc()).thenReturn(List.of(paid, pending));
+        when(advanceRepository.findTop5ByStatusOrderByDateDesc(AdvanceStatus.PENDING)).thenReturn(List.of());
+        when(debtRepository.findTop5ByStatusOrderByCreatedAtDesc(DebtStatus.ACTIVE)).thenReturn(List.of());
 
         FinancialSummaryDTO summary = reportService.getFinancialSummary();
 
@@ -83,13 +86,15 @@ class ReportServiceImplTests {
         assertThat(summary.pendingAdvancesTotal()).isEqualByComparingTo("100.00");
         assertThat(summary.activeDebtsTotal()).isEqualByComparingTo("300.00");
         assertThat(summary.pendingPaymentsCount()).isEqualTo(1L);
+        assertThat(summary.paidPaymentsTotal()).isEqualByComparingTo("1025.00");
         assertThat(summary.netPaidTotal()).isEqualByComparingTo("850.00");
         assertThat(summary.totalDiscounts()).isEqualByComparingTo("175.00");
     }
 
     @Test
     void pendingAdvancesReportOnlyUsesPendingRepositoryResults() {
-        when(advanceRepository.findByStatus(AdvanceStatus.PENDING)).thenReturn(List.of(advance(AdvanceStatus.PENDING, "100.00")));
+        when(advanceRepository.findFilteredForReport(AdvanceStatus.PENDING, null, null, null))
+            .thenReturn(List.of(advance(AdvanceStatus.PENDING, "100.00")));
 
         assertThat(reportService.getPendingAdvancesReport(new ReportFilterForm()))
             .hasSize(1)
@@ -100,7 +105,8 @@ class ReportServiceImplTests {
 
     @Test
     void activeDebtsReportOnlyUsesActiveRepositoryResults() {
-        when(debtRepository.findByStatus(DebtStatus.ACTIVE)).thenReturn(List.of(debt(DebtStatus.ACTIVE, "300.00")));
+        when(debtRepository.findFilteredForReport(DebtStatus.ACTIVE, null, null, null))
+            .thenReturn(List.of(debt(DebtStatus.ACTIVE, "300.00")));
 
         assertThat(reportService.getActiveDebtsReport(new ReportFilterForm()))
             .hasSize(1)
@@ -114,7 +120,7 @@ class ReportServiceImplTests {
         Debt debt = debt(DebtStatus.ACTIVE, "300.00");
         DebtPayment debtPayment = debtPayment(debt);
         when(workerRepository.findById(1L)).thenReturn(Optional.of(worker));
-        when(payrollPaymentRepository.findByWorkerId(1L)).thenReturn(List.of(payment(PayrollPaymentStatus.PAID)));
+        when(payrollPaymentRepository.findWithRelationsByWorkerId(1L)).thenReturn(List.of(payment(PayrollPaymentStatus.PAID)));
         when(advanceRepository.findByWorkerId(1L)).thenReturn(List.of(advance(AdvanceStatus.PENDING, "100.00")));
         when(debtRepository.findByWorkerId(1L)).thenReturn(List.of(debt));
         when(debtPaymentRepository.findByDebtWorkerId(1L)).thenReturn(List.of(debtPayment));
@@ -134,7 +140,7 @@ class ReportServiceImplTests {
     void csvEscapesCommasAndQuotes() {
         Advance advance = advance(AdvanceStatus.PENDING, "100.00");
         advance.setReason("Apoyo, \"especial\"");
-        when(advanceRepository.findByStatus(AdvanceStatus.PENDING)).thenReturn(List.of(advance));
+        when(advanceRepository.findFilteredForReport(AdvanceStatus.PENDING, null, null, null)).thenReturn(List.of(advance));
 
         String csv = reportService.exportPendingAdvancesCsv(new ReportFilterForm());
 

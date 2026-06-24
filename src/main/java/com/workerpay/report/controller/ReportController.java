@@ -7,6 +7,7 @@ import com.workerpay.report.dto.ReportFilterForm;
 import com.workerpay.report.service.ReportService;
 import com.workerpay.worker.entity.Worker;
 import com.workerpay.worker.service.WorkerService;
+import jakarta.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
@@ -41,7 +42,7 @@ public class ReportController {
     }
 
     @GetMapping("/reports/payroll-by-period")
-    public String payrollByPeriod(@ModelAttribute ReportFilterForm filter, Model model) {
+    public String payrollByPeriod(@Valid @ModelAttribute ReportFilterForm filter, Model model) {
         model.addAttribute("filter", filter);
         model.addAttribute("periods", periods());
         model.addAttribute("statuses", PayrollPaymentStatus.values());
@@ -51,7 +52,7 @@ public class ReportController {
     }
 
     @GetMapping("/reports/advances-pending")
-    public String advancesPending(@ModelAttribute ReportFilterForm filter, Model model) {
+    public String advancesPending(@Valid @ModelAttribute ReportFilterForm filter, Model model) {
         model.addAttribute("filter", filter);
         model.addAttribute("workers", workers());
         model.addAttribute("rows", reportService.getPendingAdvancesReport(filter));
@@ -60,7 +61,7 @@ public class ReportController {
     }
 
     @GetMapping("/reports/debts-active")
-    public String debtsActive(@ModelAttribute ReportFilterForm filter, Model model) {
+    public String debtsActive(@Valid @ModelAttribute ReportFilterForm filter, Model model) {
         model.addAttribute("filter", filter);
         model.addAttribute("workers", workers());
         model.addAttribute("rows", reportService.getActiveDebtsReport(filter));
@@ -69,7 +70,7 @@ public class ReportController {
     }
 
     @GetMapping("/reports/worker-history")
-    public String workerHistory(@ModelAttribute ReportFilterForm filter, Model model) {
+    public String workerHistory(@Valid @ModelAttribute ReportFilterForm filter, Model model) {
         model.addAttribute("filter", filter);
         model.addAttribute("workers", workers());
         if (filter.getWorkerId() == null) {
@@ -87,17 +88,17 @@ public class ReportController {
     }
 
     @GetMapping("/reports/export/payroll-by-period")
-    public ResponseEntity<String> exportPayrollByPeriod(@ModelAttribute ReportFilterForm filter) {
+    public ResponseEntity<String> exportPayrollByPeriod(@Valid @ModelAttribute ReportFilterForm filter) {
         return csv("pagos-por-periodo.csv", reportService.exportPayrollByPeriodCsv(filter));
     }
 
     @GetMapping("/reports/export/advances-pending")
-    public ResponseEntity<String> exportPendingAdvances(@ModelAttribute ReportFilterForm filter) {
+    public ResponseEntity<String> exportPendingAdvances(@Valid @ModelAttribute ReportFilterForm filter) {
         return csv("adelantos-pendientes.csv", reportService.exportPendingAdvancesCsv(filter));
     }
 
     @GetMapping("/reports/export/debts-active")
-    public ResponseEntity<String> exportActiveDebts(@ModelAttribute ReportFilterForm filter) {
+    public ResponseEntity<String> exportActiveDebts(@Valid @ModelAttribute ReportFilterForm filter) {
         return csv("deudas-activas.csv", reportService.exportActiveDebtsCsv(filter));
     }
 

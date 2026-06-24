@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.workerpay.advance.repository.AdvanceRepository;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.debt.entity.Debt;
 import com.workerpay.debt.entity.DebtStatus;
 import com.workerpay.debt.repository.DebtPaymentRepository;
@@ -52,6 +53,9 @@ class PayrollServiceImplTests {
     @Mock
     private DebtPaymentRepository debtPaymentRepository;
 
+    @Mock
+    private AuditService auditService;
+
     private PayrollServiceImpl payrollService;
 
     @BeforeEach
@@ -62,7 +66,8 @@ class PayrollServiceImplTests {
             workerService,
             advanceRepository,
             debtRepository,
-            debtPaymentRepository
+            debtPaymentRepository,
+            auditService
         );
     }
 
@@ -109,7 +114,7 @@ class PayrollServiceImplTests {
     @Test
     void doesNotAllowEditingPaidPayment() {
         PayrollPayment payment = payment(PayrollPaymentStatus.PAID);
-        when(payrollPaymentRepository.findById(5L)).thenReturn(Optional.of(payment));
+        when(payrollPaymentRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(payment));
 
         assertThatThrownBy(() -> payrollService.updatePayment(5L, form()))
             .isInstanceOf(IllegalStateException.class)
@@ -131,8 +136,8 @@ class PayrollServiceImplTests {
     void markAsPaidAppliesDebtDiscountToActiveDebt() {
         PayrollPayment payment = payment(PayrollPaymentStatus.PENDING);
         Debt debt = debt("100.00");
-        when(payrollPaymentRepository.findById(5L)).thenReturn(Optional.of(payment));
-        when(debtRepository.findByWorkerIdAndStatus(1L, DebtStatus.ACTIVE)).thenReturn(java.util.List.of(debt));
+        when(payrollPaymentRepository.findByIdForUpdate(5L)).thenReturn(Optional.of(payment));
+        when(debtRepository.findByWorkerIdAndStatusForUpdate(1L, DebtStatus.ACTIVE)).thenReturn(java.util.List.of(debt));
 
         payrollService.markAsPaid(5L);
 

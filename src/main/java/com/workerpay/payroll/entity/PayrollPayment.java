@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -17,7 +18,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "payroll_payments")
+@Table(name = "payroll_payments", indexes = {
+    @Index(name = "idx_payroll_payments_worker_id", columnList = "worker_id"),
+    @Index(name = "idx_payroll_payments_period_id", columnList = "period_id"),
+    @Index(name = "idx_payroll_payments_status", columnList = "status"),
+    @Index(name = "idx_payroll_payments_worker_period", columnList = "worker_id,period_id")
+})
 public class PayrollPayment extends BaseEntity {
 
     @Id

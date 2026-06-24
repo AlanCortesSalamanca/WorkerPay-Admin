@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            .orElseThrow(() -> new UsernameNotFoundException("Credenciales invalidas"));
 
         return new org.springframework.security.core.userdetails.User(
             user.getUsername(),

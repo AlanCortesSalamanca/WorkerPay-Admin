@@ -8,11 +8,14 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "payment_periods")
+@Table(name = "payment_periods", indexes = {
+    @Index(name = "idx_payment_periods_status", columnList = "status")
+})
 public class PaymentPeriod extends BaseEntity {
 
     @Id

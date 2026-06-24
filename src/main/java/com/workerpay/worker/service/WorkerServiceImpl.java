@@ -1,6 +1,7 @@
 package com.workerpay.worker.service;
 
 import com.workerpay.common.exception.ResourceNotFoundException;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.common.util.MoneyUtils;
 import com.workerpay.worker.dto.WorkerForm;
 import com.workerpay.worker.entity.Worker;
@@ -14,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkerServiceImpl implements WorkerService {
 
     private final WorkerRepository workerRepository;
+    private final AuditService auditService;
 
-    public WorkerServiceImpl(WorkerRepository workerRepository) {
+    public WorkerServiceImpl(WorkerRepository workerRepository, AuditService auditService) {
         this.workerRepository = workerRepository;
+        this.auditService = auditService;
     }
 
     @Override
@@ -42,14 +45,18 @@ public class WorkerServiceImpl implements WorkerService {
     public Worker create(WorkerForm form) {
         Worker worker = new Worker();
         applyForm(worker, form);
-        return workerRepository.save(worker);
+        Worker saved = workerRepository.save(worker);
+        auditService.logChange("CREATE", "Worker", saved.getId(), saved.getFullName());
+        return saved;
     }
 
     @Override
     public Worker update(Long id, WorkerForm form) {
         Worker worker = findById(id);
         applyForm(worker, form);
-        return workerRepository.save(worker);
+        Worker saved = workerRepository.save(worker);
+        auditService.logChange("UPDATE", "Worker", saved.getId(), saved.getFullName());
+        return saved;
     }
 
     @Override
@@ -57,6 +64,7 @@ public class WorkerServiceImpl implements WorkerService {
         Worker worker = findById(id);
         worker.setActive(false);
         workerRepository.save(worker);
+        auditService.logChange("DEACTIVATE", "Worker", worker.getId(), worker.getFullName());
     }
 
     @Override
@@ -64,6 +72,7 @@ public class WorkerServiceImpl implements WorkerService {
         Worker worker = findById(id);
         worker.setActive(true);
         workerRepository.save(worker);
+        auditService.logChange("ACTIVATE", "Worker", worker.getId(), worker.getFullName());
     }
 
     @Override

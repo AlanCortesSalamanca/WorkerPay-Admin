@@ -10,6 +10,7 @@ import com.workerpay.advance.dto.AdvanceForm;
 import com.workerpay.advance.entity.Advance;
 import com.workerpay.advance.entity.AdvanceStatus;
 import com.workerpay.advance.repository.AdvanceRepository;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.worker.entity.PaymentType;
 import com.workerpay.worker.entity.Worker;
 import com.workerpay.worker.service.WorkerService;
@@ -32,11 +33,14 @@ class AdvanceServiceImplTests {
     @Mock
     private WorkerService workerService;
 
+    @Mock
+    private AuditService auditService;
+
     private AdvanceServiceImpl advanceService;
 
     @BeforeEach
     void setUp() {
-        advanceService = new AdvanceServiceImpl(advanceRepository, workerService);
+        advanceService = new AdvanceServiceImpl(advanceRepository, workerService, auditService);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.workerpay.payroll.service;
 
 import com.workerpay.common.exception.ResourceNotFoundException;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.payroll.dto.PaymentPeriodForm;
 import com.workerpay.payroll.entity.PaymentPeriod;
 import com.workerpay.payroll.entity.PaymentPeriodStatus;
@@ -14,9 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentPeriodServiceImpl implements PaymentPeriodService {
 
     private final PaymentPeriodRepository paymentPeriodRepository;
+    private final AuditService auditService;
 
-    public PaymentPeriodServiceImpl(PaymentPeriodRepository paymentPeriodRepository) {
+    public PaymentPeriodServiceImpl(PaymentPeriodRepository paymentPeriodRepository, AuditService auditService) {
         this.paymentPeriodRepository = paymentPeriodRepository;
+        this.auditService = auditService;
     }
 
     @Override
@@ -44,7 +47,9 @@ public class PaymentPeriodServiceImpl implements PaymentPeriodService {
         PaymentPeriod period = new PaymentPeriod();
         applyForm(period, form);
         period.setStatus(PaymentPeriodStatus.OPEN);
-        return paymentPeriodRepository.save(period);
+        PaymentPeriod saved = paymentPeriodRepository.save(period);
+        auditService.logChange("CREATE", "PaymentPeriod", saved.getId(), saved.getName());
+        return saved;
     }
 
     @Override
@@ -55,7 +60,9 @@ public class PaymentPeriodServiceImpl implements PaymentPeriodService {
         }
         validateDates(form);
         applyForm(period, form);
-        return paymentPeriodRepository.save(period);
+        PaymentPeriod saved = paymentPeriodRepository.save(period);
+        auditService.logChange("UPDATE", "PaymentPeriod", saved.getId(), saved.getName());
+        return saved;
     }
 
     @Override
@@ -66,6 +73,7 @@ public class PaymentPeriodServiceImpl implements PaymentPeriodService {
         }
         period.setStatus(PaymentPeriodStatus.CLOSED);
         paymentPeriodRepository.save(period);
+        auditService.logChange("CLOSE", "PaymentPeriod", period.getId(), period.getName());
     }
 
     @Override

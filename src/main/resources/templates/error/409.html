@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Conflicto de datos</title>
+</head>
+<body>
+<main>
+    <h1>Conflicto de datos</h1>
+    <p th:text="${message}">El registro fue modificado por otro usuario.</p>
+    <a th:href="@{/dashboard}">Volver al inicio</a>
+</main>
+</body>
+</html>

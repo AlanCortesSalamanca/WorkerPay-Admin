@@ -5,6 +5,7 @@ import com.workerpay.advance.entity.Advance;
 import com.workerpay.advance.entity.AdvanceStatus;
 import com.workerpay.advance.repository.AdvanceRepository;
 import com.workerpay.common.exception.ResourceNotFoundException;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.common.util.MoneyUtils;
 import com.workerpay.worker.entity.Worker;
 import com.workerpay.worker.service.WorkerService;
@@ -19,16 +20,18 @@ public class AdvanceServiceImpl implements AdvanceService {
 
     private final AdvanceRepository advanceRepository;
     private final WorkerService workerService;
+    private final AuditService auditService;
 
-    public AdvanceServiceImpl(AdvanceRepository advanceRepository, WorkerService workerService) {
+    public AdvanceServiceImpl(AdvanceRepository advanceRepository, WorkerService workerService, AuditService auditService) {
         this.advanceRepository = advanceRepository;
         this.workerService = workerService;
+        this.auditService = auditService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Advance> findAll() {
-        return advanceRepository.findAll();
+        return advanceRepository.findAllByOrderByDateDesc();
     }
 
     @Override
@@ -43,7 +46,9 @@ public class AdvanceServiceImpl implements AdvanceService {
         Advance advance = new Advance();
         applyForm(advance, form);
         advance.setStatus(AdvanceStatus.PENDING);
-        return advanceRepository.save(advance);
+        Advance saved = advanceRepository.save(advance);
+        auditService.logChange("CREATE", "Advance", saved.getId(), saved.getAmount().toPlainString());
+        return saved;
     }
 
     @Override
@@ -51,7 +56,9 @@ public class AdvanceServiceImpl implements AdvanceService {
         Advance advance = findById(id);
         requirePending(advance, "Solo se pueden editar adelantos pendientes.");
         applyForm(advance, form);
-        return advanceRepository.save(advance);
+        Advance saved = advanceRepository.save(advance);
+        auditService.logChange("UPDATE", "Advance", saved.getId(), saved.getAmount().toPlainString());
+        return saved;
     }
 
     @Override
@@ -65,9 +72,11 @@ public class AdvanceServiceImpl implements AdvanceService {
         }
         advance.setStatus(AdvanceStatus.CANCELLED);
         advanceRepository.save(advance);
+        auditService.logChange("CANCEL", "Advance", advance.getId(), advance.getAmount().toPlainString());
     }
 
     @Override
+    @Transactional(timeout = 15)
     public void markAsDiscounted(Long id) {
         Advance advance = findById(id);
         if (advance.getStatus() == AdvanceStatus.CANCELLED) {
@@ -78,6 +87,7 @@ public class AdvanceServiceImpl implements AdvanceService {
         }
         advance.setStatus(AdvanceStatus.DISCOUNTED);
         advanceRepository.save(advance);
+        auditService.logChange("DISCOUNT", "Advance", advance.getId(), advance.getAmount().toPlainString());
     }
 
     @Override

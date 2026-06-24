@@ -28,8 +28,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Predicate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -110,7 +108,7 @@ public class ReportServiceImpl implements ReportService {
     public WorkerFinancialHistoryDTO getWorkerFinancialHistory(Long workerId) {
         Worker worker = workerRepository.findById(workerId)
             .orElseThrow(() -> new ResourceNotFoundException("Trabajador no encontrado"));
-        List<PayrollPayment> payments = payrollPaymentRepository.findByWorkerId(workerId);
+        List<PayrollPayment> payments = payrollPaymentRepository.findWithRelationsByWorkerId(workerId);
         List<Advance> advances = advanceRepository.findByWorkerId(workerId);
         List<Debt> debts = debtRepository.findByWorkerId(workerId);
         List<DebtPayment> debtPayments = debtPaymentRepository.findByDebtWorkerId(workerId);
@@ -153,10 +151,7 @@ public class ReportServiceImpl implements ReportService {
     public FinancialSummaryDTO getFinancialSummary() {
         List<Advance> pendingAdvances = advanceRepository.findByStatus(AdvanceStatus.PENDING);
         List<Debt> activeDebts = debtRepository.findByStatus(DebtStatus.ACTIVE);
-        List<PayrollPayment> payments = payrollPaymentRepository.findAll();
-        List<PayrollPayment> paidPayments = payments.stream()
-            .filter(payment -> payment.getStatus() == PayrollPaymentStatus.PAID)
-            .toList();
+        List<PayrollPayment> paidPayments = payrollPaymentRepository.findWithRelationsByStatus(PayrollPaymentStatus.PAID);
         BigDecimal totalDiscounts = sum(paidPayments.stream().map(PayrollPayment::getAdvanceDiscount).toList())
             .add(sum(paidPayments.stream().map(PayrollPayment::getDebtDiscount).toList()))
             .add(sum(paidPayments.stream().map(PayrollPayment::getOtherDiscounts).toList()));
@@ -167,12 +162,12 @@ public class ReportServiceImpl implements ReportService {
             activeDebts.size(),
             sum(activeDebts.stream().map(Debt::getCurrentBalance).toList()),
             payrollPaymentRepository.countByStatus(PayrollPaymentStatus.PENDING),
-            sum(paidPayments.stream().map(PayrollPayment::getNetPayment).toList()),
+            sumGrossPayments(paidPayments),
             sum(paidPayments.stream().map(PayrollPayment::getNetPayment).toList()),
             MoneyUtils.normalize(totalDiscounts),
-            payments.stream().sorted(byPaymentDateDesc()).limit(5).map(this::toPayrollReport).toList(),
-            pendingAdvances.stream().sorted(byAdvanceDateDesc()).limit(5).map(this::toPendingAdvanceReport).toList(),
-            activeDebts.stream().sorted(byDebtCreatedAtDesc()).limit(5).map(this::toActiveDebtReport).toList()
+            payrollPaymentRepository.findTop5ByOrderByPaymentDateDesc().stream().map(this::toPayrollReport).toList(),
+            advanceRepository.findTop5ByStatusOrderByDateDesc(AdvanceStatus.PENDING).stream().map(this::toPendingAdvanceReport).toList(),
+            debtRepository.findTop5ByStatusOrderByCreatedAtDesc(DebtStatus.ACTIVE).stream().map(this::toActiveDebtReport).toList()
         );
     }
 
@@ -260,31 +255,32 @@ public class ReportServiceImpl implements ReportService {
 
     private List<PayrollPayment> filteredPayroll(ReportFilterForm filter) {
         ReportFilterForm safeFilter = safe(filter);
-        return payrollPaymentRepository.findAll().stream()
-            .filter(payment -> safeFilter.getPeriodId() == null || payment.getPeriod().getId().equals(safeFilter.getPeriodId()))
-            .filter(payment -> matchesStatus(payment.getStatus().name(), safeFilter.getStatus()))
-            .filter(payment -> withinDates(payment.getPaymentDate(), safeFilter.getStartDate(), safeFilter.getEndDate()))
-            .sorted(byPaymentDateDesc())
-            .toList();
+        return payrollPaymentRepository.findFilteredForReport(
+            safeFilter.getPeriodId(),
+            payrollStatus(safeFilter.getStatus()),
+            safeFilter.getStartDate(),
+            safeFilter.getEndDate()
+        );
     }
 
     private List<Advance> filteredPendingAdvances(ReportFilterForm filter) {
         ReportFilterForm safeFilter = safe(filter);
-        return advanceRepository.findByStatus(AdvanceStatus.PENDING).stream()
-            .filter(advance -> safeFilter.getWorkerId() == null || advance.getWorker().getId().equals(safeFilter.getWorkerId()))
-            .filter(advance -> withinDates(advance.getDate(), safeFilter.getStartDate(), safeFilter.getEndDate()))
-            .sorted(byAdvanceDateDesc())
-            .toList();
+        return advanceRepository.findFilteredForReport(
+            AdvanceStatus.PENDING,
+            safeFilter.getWorkerId(),
+            safeFilter.getStartDate(),
+            safeFilter.getEndDate()
+        );
     }
 
     private List<Debt> filteredActiveDebts(ReportFilterForm filter) {
         ReportFilterForm safeFilter = safe(filter);
-        return debtRepository.findByStatus(DebtStatus.ACTIVE).stream()
-            .filter(debt -> safeFilter.getWorkerId() == null || debt.getWorker().getId().equals(safeFilter.getWorkerId()))
-            .filter(debt -> safeFilter.getMinAmount() == null || debt.getCurrentBalance().compareTo(safeFilter.getMinAmount()) >= 0)
-            .filter(debt -> safeFilter.getMaxAmount() == null || debt.getCurrentBalance().compareTo(safeFilter.getMaxAmount()) <= 0)
-            .sorted(byDebtCreatedAtDesc())
-            .toList();
+        return debtRepository.findFilteredForReport(
+            DebtStatus.ACTIVE,
+            safeFilter.getWorkerId(),
+            safeFilter.getMinAmount(),
+            safeFilter.getMaxAmount()
+        );
     }
 
     private PayrollByPeriodReportDTO toPayrollReport(PayrollPayment payment) {
@@ -362,17 +358,21 @@ public class ReportServiceImpl implements ReportService {
             .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
     }
 
-    private boolean withinDates(LocalDate value, LocalDate startDate, LocalDate endDate) {
-        if (value == null) {
-            return false;
-        }
-        return (startDate == null || !value.isBefore(startDate)) && (endDate == null || !value.isAfter(endDate));
+    private BigDecimal sumGrossPayments(List<PayrollPayment> payments) {
+        return payments.stream()
+            .map(payment -> MoneyUtils.normalize(payment.getBaseAmount()).add(MoneyUtils.normalize(payment.getBonuses())))
+            .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add);
     }
 
-    private boolean matchesStatus(String actualStatus, String expectedStatus) {
-        return expectedStatus == null
-            || expectedStatus.isBlank()
-            || actualStatus.equalsIgnoreCase(expectedStatus.trim());
+    private PayrollPaymentStatus payrollStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        try {
+            return PayrollPaymentStatus.valueOf(status.trim().toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("Estado de pago invalido.");
+        }
     }
 
     private ReportFilterForm safe(ReportFilterForm filter) {

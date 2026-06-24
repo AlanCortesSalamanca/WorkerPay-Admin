@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.workerpay.common.service.AuditService;
 import com.workerpay.debt.dto.DebtForm;
 import com.workerpay.debt.dto.DebtPaymentForm;
 import com.workerpay.debt.entity.Debt;
@@ -35,11 +36,14 @@ class DebtServiceImplTests {
     @Mock
     private WorkerService workerService;
 
+    @Mock
+    private AuditService auditService;
+
     private DebtServiceImpl debtService;
 
     @BeforeEach
     void setUp() {
-        debtService = new DebtServiceImpl(debtRepository, debtPaymentRepository, workerService);
+        debtService = new DebtServiceImpl(debtRepository, debtPaymentRepository, workerService, auditService);
     }
 
     @Test
@@ -57,7 +61,7 @@ class DebtServiceImplTests {
     @Test
     void paymentReducesBalance() {
         Debt debt = debt();
-        when(debtRepository.findById(10L)).thenReturn(Optional.of(debt));
+        when(debtRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(debt));
         when(debtPaymentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         debtService.addPayment(10L, paymentForm("125.00"));
@@ -69,7 +73,7 @@ class DebtServiceImplTests {
     @Test
     void paymentMarksDebtAsPaidWhenBalanceReachesZero() {
         Debt debt = debt();
-        when(debtRepository.findById(10L)).thenReturn(Optional.of(debt));
+        when(debtRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(debt));
         when(debtPaymentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         debtService.addPayment(10L, paymentForm("300.00"));
@@ -80,7 +84,7 @@ class DebtServiceImplTests {
 
     @Test
     void doesNotAllowPaymentGreaterThanBalance() {
-        when(debtRepository.findById(10L)).thenReturn(Optional.of(debt()));
+        when(debtRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(debt()));
 
         assertThatThrownBy(() -> debtService.addPayment(10L, paymentForm("301.00")))
             .isInstanceOf(IllegalStateException.class)
@@ -91,7 +95,7 @@ class DebtServiceImplTests {
     void doesNotAllowPaymentOnCancelledDebt() {
         Debt debt = debt();
         debt.setStatus(DebtStatus.CANCELLED);
-        when(debtRepository.findById(10L)).thenReturn(Optional.of(debt));
+        when(debtRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(debt));
 
         assertThatThrownBy(() -> debtService.addPayment(10L, paymentForm("50.00")))
             .isInstanceOf(IllegalStateException.class)

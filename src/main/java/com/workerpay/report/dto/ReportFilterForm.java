@@ -1,13 +1,22 @@
 package com.workerpay.report.dto;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class ReportFilterForm {
 
+    @Positive
     private Long workerId;
+
+    @Positive
     private Long periodId;
+
+    @Size(max = 20)
     private String status;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -16,7 +25,12 @@ public class ReportFilterForm {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate endDate;
 
+    @DecimalMin("0.00")
+    @DecimalMax("999999999.99")
     private BigDecimal minAmount;
+
+    @DecimalMin("0.00")
+    @DecimalMax("999999999.99")
     private BigDecimal maxAmount;
 
     public Long getWorkerId() {

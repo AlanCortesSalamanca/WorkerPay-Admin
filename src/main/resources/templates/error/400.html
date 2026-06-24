@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud invalida</title>
+</head>
+<body>
+<main>
+    <h1>Solicitud invalida</h1>
+    <p th:text="${message}">La solicitud no pudo procesarse.</p>
+    <a th:href="@{/dashboard}">Volver al inicio</a>
+</main>
+</body>
+</html>

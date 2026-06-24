@@ -4,6 +4,7 @@ import com.workerpay.advance.entity.Advance;
 import com.workerpay.advance.entity.AdvanceStatus;
 import com.workerpay.advance.repository.AdvanceRepository;
 import com.workerpay.common.exception.ResourceNotFoundException;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.common.util.MoneyUtils;
 import com.workerpay.debt.entity.Debt;
 import com.workerpay.debt.entity.DebtPayment;
@@ -21,7 +22,6 @@ import com.workerpay.worker.entity.Worker;
 import com.workerpay.worker.service.WorkerService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +36,7 @@ public class PayrollServiceImpl implements PayrollService {
     private final AdvanceRepository advanceRepository;
     private final DebtRepository debtRepository;
     private final DebtPaymentRepository debtPaymentRepository;
+    private final AuditService auditService;
 
     public PayrollServiceImpl(
         PayrollPaymentRepository payrollPaymentRepository,
@@ -43,7 +44,8 @@ public class PayrollServiceImpl implements PayrollService {
         WorkerService workerService,
         AdvanceRepository advanceRepository,
         DebtRepository debtRepository,
-        DebtPaymentRepository debtPaymentRepository
+        DebtPaymentRepository debtPaymentRepository,
+        AuditService auditService
     ) {
         this.payrollPaymentRepository = payrollPaymentRepository;
         this.paymentPeriodRepository = paymentPeriodRepository;
@@ -51,12 +53,13 @@ public class PayrollServiceImpl implements PayrollService {
         this.advanceRepository = advanceRepository;
         this.debtRepository = debtRepository;
         this.debtPaymentRepository = debtPaymentRepository;
+        this.auditService = auditService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PayrollPayment> findAllPayments() {
-        return payrollPaymentRepository.findAll();
+        return payrollPaymentRepository.findAllByOrderByPaymentDateDesc();
     }
 
     @Override
@@ -83,12 +86,16 @@ public class PayrollServiceImpl implements PayrollService {
         payment.setPeriod(period);
         applyForm(payment, form);
         payment.setStatus(PayrollPaymentStatus.PENDING);
-        return payrollPaymentRepository.save(payment);
+        PayrollPayment saved = payrollPaymentRepository.save(payment);
+        auditService.logChange("CREATE", "PayrollPayment", saved.getId(), saved.getNetPayment().toPlainString());
+        return saved;
     }
 
     @Override
+    @Transactional(timeout = 15)
     public PayrollPayment updatePayment(Long id, PayrollPaymentForm form) {
-        PayrollPayment payment = findPaymentById(id);
+        PayrollPayment payment = payrollPaymentRepository.findByIdForUpdate(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado"));
         requirePending(payment, "Solo se pueden editar pagos pendientes.");
         PaymentPeriod period = findPeriod(form.getPeriodId());
         requireOpenPeriod(period);
@@ -105,7 +112,9 @@ public class PayrollServiceImpl implements PayrollService {
         payment.setWorker(workerService.findById(form.getWorkerId()));
         payment.setPeriod(period);
         applyForm(payment, form);
-        return payrollPaymentRepository.save(payment);
+        PayrollPayment saved = payrollPaymentRepository.save(payment);
+        auditService.logChange("UPDATE", "PayrollPayment", saved.getId(), saved.getNetPayment().toPlainString());
+        return saved;
     }
 
     @Override
@@ -119,16 +128,20 @@ public class PayrollServiceImpl implements PayrollService {
         }
         payment.setStatus(PayrollPaymentStatus.CANCELLED);
         payrollPaymentRepository.save(payment);
+        auditService.logChange("CANCEL", "PayrollPayment", payment.getId(), payment.getNetPayment().toPlainString());
     }
 
     @Override
+    @Transactional(timeout = 15)
     public boolean markAsPaid(Long id) {
-        PayrollPayment payment = findPaymentById(id);
+        PayrollPayment payment = payrollPaymentRepository.findByIdForUpdate(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado"));
         requirePending(payment, "Solo se pueden marcar como pagados los pagos pendientes.");
         boolean advancesMatched = markAdvancesIfExact(payment);
         applyDebtDiscount(payment);
         payment.setStatus(PayrollPaymentStatus.PAID);
         payrollPaymentRepository.save(payment);
+        auditService.logChange("PAY", "PayrollPayment", payment.getId(), payment.getNetPayment().toPlainString());
         return advancesMatched;
     }
 
@@ -170,13 +183,11 @@ public class PayrollServiceImpl implements PayrollService {
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getPaidTotalForCurrentOpenPeriod() {
-        return paymentPeriodRepository.findByStatus(PaymentPeriodStatus.OPEN).stream()
-            .max(Comparator.comparing(PaymentPeriod::getStartDate))
-            .map(period -> payrollPaymentRepository.findByPeriodId(period.getId()).stream()
-                .filter(payment -> payment.getStatus() == PayrollPaymentStatus.PAID)
-                .map(PayrollPayment::getNetPayment)
-                .map(MoneyUtils::normalize)
-                .reduce(BigDecimal.ZERO.setScale(2), BigDecimal::add))
+        return paymentPeriodRepository.findFirstByStatusOrderByStartDateDesc(PaymentPeriodStatus.OPEN)
+            .map(period -> MoneyUtils.normalize(payrollPaymentRepository.sumNetPaymentByPeriodIdAndStatus(
+                period.getId(),
+                PayrollPaymentStatus.PAID
+            )))
             .orElse(BigDecimal.ZERO.setScale(2));
     }
 
@@ -232,7 +243,7 @@ public class PayrollServiceImpl implements PayrollService {
         if (discount.compareTo(BigDecimal.ZERO) == 0) {
             return true;
         }
-        List<Advance> pendingAdvances = advanceRepository.findByWorkerIdAndStatus(
+        List<Advance> pendingAdvances = advanceRepository.findByWorkerIdAndStatusForUpdate(
             payment.getWorker().getId(),
             AdvanceStatus.PENDING
         );
@@ -253,12 +264,10 @@ public class PayrollServiceImpl implements PayrollService {
         if (remainingDiscount.compareTo(BigDecimal.ZERO) == 0) {
             return;
         }
-        List<Debt> activeDebts = debtRepository.findByWorkerIdAndStatus(
+        List<Debt> activeDebts = debtRepository.findByWorkerIdAndStatusForUpdate(
             payment.getWorker().getId(),
             DebtStatus.ACTIVE
-        ).stream()
-            .sorted(Comparator.comparing(Debt::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())))
-            .toList();
+        );
         BigDecimal activeBalance = activeDebts.stream()
             .map(Debt::getCurrentBalance)
             .map(MoneyUtils::normalize)

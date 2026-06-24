@@ -1,6 +1,7 @@
 package com.workerpay.debt.service;
 
 import com.workerpay.common.exception.ResourceNotFoundException;
+import com.workerpay.common.service.AuditService;
 import com.workerpay.common.util.MoneyUtils;
 import com.workerpay.debt.dto.DebtForm;
 import com.workerpay.debt.dto.DebtPaymentForm;
@@ -24,21 +25,24 @@ public class DebtServiceImpl implements DebtService {
     private final DebtRepository debtRepository;
     private final DebtPaymentRepository debtPaymentRepository;
     private final WorkerService workerService;
+    private final AuditService auditService;
 
     public DebtServiceImpl(
         DebtRepository debtRepository,
         DebtPaymentRepository debtPaymentRepository,
-        WorkerService workerService
+        WorkerService workerService,
+        AuditService auditService
     ) {
         this.debtRepository = debtRepository;
         this.debtPaymentRepository = debtPaymentRepository;
         this.workerService = workerService;
+        this.auditService = auditService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<Debt> findAll() {
-        return debtRepository.findAll();
+        return debtRepository.findAllByOrderByCreatedAtDesc();
     }
 
     @Override
@@ -59,7 +63,9 @@ public class DebtServiceImpl implements DebtService {
         debt.setSuggestedPayment(MoneyUtils.normalize(form.getSuggestedPayment()));
         debt.setDescription(clean(form.getDescription()));
         debt.setStatus(DebtStatus.ACTIVE);
-        return debtRepository.save(debt);
+        Debt saved = debtRepository.save(debt);
+        auditService.logChange("CREATE", "Debt", saved.getId(), saved.getOriginalAmount().toPlainString());
+        return saved;
     }
 
     @Override
@@ -69,7 +75,9 @@ public class DebtServiceImpl implements DebtService {
         debt.setWorker(workerService.findById(form.getWorkerId()));
         debt.setSuggestedPayment(MoneyUtils.normalize(form.getSuggestedPayment()));
         debt.setDescription(clean(form.getDescription()));
-        return debtRepository.save(debt);
+        Debt saved = debtRepository.save(debt);
+        auditService.logChange("UPDATE", "Debt", saved.getId(), saved.getCurrentBalance().toPlainString());
+        return saved;
     }
 
     @Override
@@ -83,11 +91,14 @@ public class DebtServiceImpl implements DebtService {
         }
         debt.setStatus(DebtStatus.CANCELLED);
         debtRepository.save(debt);
+        auditService.logChange("CANCEL", "Debt", debt.getId(), debt.getCurrentBalance().toPlainString());
     }
 
     @Override
+    @Transactional(timeout = 15)
     public DebtPayment addPayment(Long debtId, DebtPaymentForm form) {
-        Debt debt = findById(debtId);
+        Debt debt = debtRepository.findByIdForUpdate(debtId)
+            .orElseThrow(() -> new ResourceNotFoundException("Deuda no encontrada"));
         requireActive(debt, "Solo se pueden registrar abonos en deudas activas.");
         BigDecimal amount = MoneyUtils.normalize(form.getAmount());
         if (amount.compareTo(debt.getCurrentBalance()) > 0) {
@@ -103,7 +114,9 @@ public class DebtServiceImpl implements DebtService {
             debt.setStatus(DebtStatus.PAID);
         }
         debtRepository.save(debt);
-        return debtPaymentRepository.save(payment);
+        DebtPayment savedPayment = debtPaymentRepository.save(payment);
+        auditService.logChange("PAYMENT", "Debt", debt.getId(), amount.toPlainString());
+        return savedPayment;
     }
 
     @Override
